@@ -1,5 +1,15 @@
 @import url(http://fonts.googleapis.com/css?family=Dorsa);
 @charset "utf-8";
+
+.navbar .brand {
+  line-height: 1;
+  font-size: 56px;
+  color: white;
+  text-shadow: none;
+}
+.navbar .brand a{
+  color: white;
+}
 /* CSS Document */
 a[href^="tel:"] {
   color: inherit;
