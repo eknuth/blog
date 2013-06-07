@@ -2,7 +2,6 @@ var images;
 
 var jsonFlickrFeed = function (results) {
 	images = $.map(results.items, function (image) {
-		console.log(image);
 		return { 
 			thumb: image.media.m,
 			title: image.title,
