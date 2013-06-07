@@ -430,7 +430,7 @@ p {
 }
 .list {
   list-style: none outside;
-  padding-top: 14px;
+  
   float: left;
   width: 106px;
   margin: 0;
@@ -531,17 +531,21 @@ p {
   margin: 21px 0 24px;
 }
 .meta {
-	margin-bottom: 10px;
+	
     overflow: hidden;}
 .meta a:hover {
 	color:#F25C27;
 	text-decoration:underline;}
 .date-1 {
   float: left;
-  border-right: 1px solid #7f7f7f;
-  line-height: 18px;
+  font-weight: bold;
+  line-height: 1;
   padding-right: 8px;
-  font-size:12px;
+  font-size:14px;
+  margin-bottom: 10px;
+}
+.thumbnail .btn {
+
 }
 .name-author {
   float: left;
