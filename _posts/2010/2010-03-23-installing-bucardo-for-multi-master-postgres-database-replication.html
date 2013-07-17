@@ -1,0 +1,85 @@
+--- 
+layout: post
+title: installing bucardo for multi-master postgres database replication
+tags: 
+- bucardo
+- django
+- linux
+- postgresql
+- replication
+- rubyrep
+- technology
+- ubuntu
+status: publish
+type: post
+published: true
+meta: 
+  _edit_last: "1"
+  _sexybookmarks_shortUrl: http://b2l.me/qxm2t
+  _sexybookmarks_permaHash: 6245f9d1ca34e44592cfd650be1b9d81
+---
+In my quest for postgres replication/clustering nirvana I've played with pgpool, slony, rubyrep and now bucardo. Our requirements are painless bidirectional synchronization between two postgresql databases that serve a django application.
+
+<a href="/assets/images/2010/03/ecologiablog_Ibex.jpg"><img class="size-full wp-image-80 alignright" style="border: 0px initial initial;" title="ecologiablog_Ibex" src="/assets/images/2010/03/ecologiablog_Ibex.jpg" alt="bucardo" width="432" height="324" /></a>
+
+Bucardo seems awesome, but there are some problems with the install scripts.  I hope to work them out in a future post. In the meantime here are some notes about installing bucardo on ubuntu 9.10.
+<p style="text-align: center;"></p>
+Bucardo is written in perl and seems to be a little more complicated than rubyrep to get up and running. I'll be testing it out on a virtualbox vm running ubuntu 9.10 karmic koala. This is postgres 8.4, for the record.
+
+The first prerequisite for bucard is the DBIx::Safe perl module. Unfortunately there isn't a package available in the default 9.10 repo's, but it does look like it's out for lucid.
+
+I'm just going to install DBIx::Safe from source. It and bucardo require the DBD::Pg perl module, which is available from the ubuntu repo. I'll install that with:
+<code lang="bash">sudo aptitude install libdbd-pg-perl</code>
+The <a href="http://bucardo.org/wiki/Bucardo/Installation">bucardo directions</a> have instructions for installing DBIx::Safe from source, so I'll leave that up to them. The directions also state that DBIx::Sage is a rereq, but I couldn't find that. The bucardo build did not complain about lacking that module, so I'm hoping we're good to go.
+
+After getting and building bucardo, the next step is to add the new functions to your database. Bucardo uses stored procedures written in perl to handle the replication. The instructions use yum to install this from a package on redhat/centos style servers. For ubuntu, we'll do:
+<code lang="bash">sudo aptitude install postgresql-plperl-8.4</code>
+The next step is run the bucardo_ctl install script. It prompts you for database settings, which is kind of a hassle. rubyrep was much more straightforward. It also creates a bucardo superuser on the database. The script prompts you for the the password for this user, but there doesn't seem to be a step to set the password. I opened up a psql session and ran the following:
+<code lang="sql">alter user bucardo with password 'CHGME';</code>
+Definitely change that password to something a little more secure. While you are at it, make sure you are being secure with your db connections. You don't want port 5432 open to the world, and please use SSL.
+
+The bucardo_ctl script gave me an error about not having the plperl language available. I tried various things and got tired of running the script. I installed the bucardo functions to the database with the following command:
+<code lang="bash">psql DBNAME -h localhost -f /usr/local/share/bucardo/bucardo.schema</code>
+The next step is to add the database to be replicated to bucardo. bucardo_ctl had a little trouble authenticating. I needed to specify the hostname. You can do it like this:
+<code lang="bash">bucardo_ctl --dbhost=localhost --dbpass=BUCARDO_PASSWORD add database DBNAME</code>
+For some reason bucardo had a lot of trouble installing on Ubuntu. I kept getting an error about missing plperlu, even though the package was installed on the server and I could manually add the language to a database.
+
+There seem to be a few errors in the bucardo_ctl perl script. I had to make two changes to get it to work. You need to comment the exit command after the bucardo_schema file is installed, and a secret hardcoded db password at the end of the install:
+<code lang="perl">5465 if ($res !~ m{Pl/PerlU was successfully installed}) {</code>
+
+<code lang="perl">5466 warn "\nINSTALLATION FAILED! ($res)\n\n";
+
+5467 warn "Installation cannot proceed unless the Pl/PerlU language is available\n";
+
+5468 warn "This is usually available as a separate package\n";
+
+5469 warn "For example, you might try: yum install postgresql-plperl\n";
+
+5470 warn "If compiling from source, add the --with-perl option to your ./configure comma 5470 nd\n\n";
+
+5471 # exit 1;
+
+5472 }
+
+.......
+
+5481 $port and $BDSN .= ";port=$port";
+
+5482 my $default_bucardo_password = 'replicate';
+
+</code>
+
+<code lang="perl">5483 $dbh = DBI-&gt;connect($BDSN, 'bucardo', $default_bucardo_password, {AutoCommit=&gt;0,RaiseError=&gt; 5483 1,PrintError=&gt;0});</code>
+Now, let us create a few databases, populate and then sync them with bucardo. We'll be using pgbench to generate some test data.
+<code lang="bash">createdb db_left
+createdb db_right
+pgbench -i db_left
+pgbench -i db_right</code>
+We'll be starting with two identical databases, populated with some data. One of the tables does not have a primary key defined, but bucardo can handle that. I'm not really interested in that functionality, so I'm not going to worry about it here.
+
+To add the databases to replication, execute the following commands:
+<code lang="bash">bucardo_ctl add database db_left --dbhost=localhost --dbpass=PASS
+bucardo_ctl add database db_right --dbhost=localhost --dbpass=PASS
+bucardo_ctl add all tables
+bucardo_ctl add all sequences
+</code>

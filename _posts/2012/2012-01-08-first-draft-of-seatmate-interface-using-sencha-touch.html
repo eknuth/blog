@@ -1,0 +1,84 @@
+--- 
+layout: post
+title: first draft of seatMate interface using sencha touch
+tags: 
+- extjs
+- geoext
+- seatMate
+- sencha
+- technology
+- trimet
+status: publish
+type: post
+published: true
+meta: 
+  _edit_last: "1"
+  _canonical: ""
+---
+<h2>creating a mobile web app from a mockup</h2>
+<p style="text-align: center;"><a href="/assets/images/2012/01/flirt-tab.png"><img class=" wp-image-466 aligncenter" title="flirt-tab" src="/assets/images/2012/01/flirt-tab.png" alt="" width="407" height="240" /></a></p>
+I've started on the interface using sencha touch, a mobile web framework.  <a href="http://www.sencha.com/products/touch/" target="_blank">Sencha Touch</a> is part of the <a href="http://www.sencha.com/products/extjs" target="_blank">ExtJS</a> family of javascript libraries.  I've hard good things about sencha and<a href="http://geoext.org/" target="_blank"> GeoExt</a>, so I'm excited to give it a shot.  The style is similar to how we used to develop web apps at the company I work for, but we've since moved on to using <a href="http://knockoutjs.com/" target="_blank">knockout.js</a>.
+<h2>the sencha touch approach</h2>
+Sencha lets you build up a mobile web frontend programmatically rather than starting from existing html.  You create objects that represent forms, tabs, carousels and everything else you need to develop a smartphone or tablet app.  Sencha produces html5 and supports many of the animations and transitions that are used in native iOS and android apps.
+
+I've made good progress and sencha seems robust and flexible.  My main concern is that the workflow is clumsy.  Rather than writing html to create the interface, you describe it in javascript.  I would rather create the page freely and then add behavior.
+
+Using code inspired by several of the online demos, I've put together a sencha app with an initial stab at a chat/comment view.  I have a comment entry field and a submit button as well as a table of comments.  The other tabs will follow the same general pattern, but aren't built yet.
+<h2> serving the static html, css and js files</h2>
+Since the files are static html I can view them directly in a browser without spending time setting up a webserver.  However, I'm using a snippet of javascript for node.js that serves up the contents of the static directory on port 8000.  I've pushed this version to the repo and deployed it to nodejitsu.
+<h2>deployed to hosting provider</h2>
+You can check it out at <a href="http://seatmate.nodejitsu.com/" target="_blank">http://seatmate.nodejitsu.com/</a>
+
+<a href="/assets/images/2012/01/Screen-shot-2012-01-08-at-5.37.36-PM.png"><img class="alignleft  wp-image-464" title="first  sencha touch mockup" src="/assets/images/2012/01/Screen-shot-2012-01-08-at-5.37.36-PM.png" alt="first sencha touch mockup" width="277" height="430" /></a><a href="/assets/images/2012/01/chat-tab1.png"><img class=" wp-image-465 alignright" title="chat-tab" src="/assets/images/2012/01/chat-tab1.png" alt="" width="236" height="375" /></a>
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+I've also attached a few more mockups of the other screens.  They are in landscape and portrait mode.
+
+&nbsp;
+
+&nbsp;

@@ -1,0 +1,118 @@
+--- 
+layout: post
+title: getting started for tdd using jasmine and backbone.js
+tags: 
+- backbone.js
+- bdd
+- jasmine
+- javascript
+- jquery
+- tdd
+- technology
+- underscore.js
+status: publish
+type: post
+published: true
+meta: 
+  _edit_last: "1"
+  _sexybookmarks_shortUrl: http://bit.ly/i5c1Pg
+  _sexybookmarks_permaHash: 55033dde8dadb49b6bccf1d8ea147aaa
+---
+Developing in javascript is a fun and exciting process.  Debugging code in the browser using firebug can provide instant gratification.  Good test coverage is a must when the code you write could potentially be executed in any number of platforms.
+
+Writing unit tests isn't always a priority and peace of mind can be hard to come by, but one way of dealing with the uncertainty is to practice <a href="http://en.wikipedia.org/wiki/Test_Driven_Development">test driven development</a>.  Using this style means that you write the test before the code and theoretically everything you write already has test coverage.  This makes it less stressful to maintain and refactor your codebase.
+
+<a href="/assets/images/2011/04/Screen-shot-2011-04-22-at-3.02.15-PM.png"><img src="/assets/images/2011/04/Screen-shot-2011-04-22-at-3.02.15-PM.png" alt="" title="Screen shot 2011-04-22 at 3.02.15 PM" width="91" height="96" class="alignright size-full wp-image-369" /></a><a href="http://en.wikipedia.org/wiki/Behavior_Driven_Development">Behavior Driven Design</a> is an extension of this philosophy that provides a higher level understanding of what can be expected from the code you write. You still have to write unit tests, but they are attached to specifications of the behavior.  There are many frameworks for TDD and BDD and I am going to explore <a href="http://pivotal.github.com/jasmine/">jasmine</a>, which is a more recent addition to the javascript testing world.
+
+<a href="/assets/images/2011/04/Screen-shot-2011-04-22-at-3.04.00-PM.png"><img src="/assets/images/2011/04/Screen-shot-2011-04-22-at-3.04.00-PM-300x52.png" alt="" title="Screen shot 2011-04-22 at 3.04.00 PM" width="300" height="52" class="aligncenter size-medium wp-image-372" /></a>I am also interested in checking out <a href="http://documentcloud.github.com/backbone/">backbone.js</a>, which is a <a href="http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">MVC</a> style framework for writing javascript applications.  Most developers are familiar with frameworks like django and rails for writing traditional web apps in python and ruby.  For those of us who are interested in providing more a more dynamic experience, javascript is the language of choice.  It also makes sense to farm out the workload to user's computers rather than wasting valuable server side processing power.
+
+Setting up jasmine to work with backbone.js is fairly straightforward.  I did run into a few snags and I thought it might be useful to document the process I went through.  I'm assuming you are using a mac or linux computer and are familiar with the command line.
+
+First download the jasmine testing framework.  We need the jasmine standalone distribution.
+<code>
+mkdir project; cd project
+curl -O http://pivotal.github.com/jasmine/downloads/jasmine-standalone-1.0.2.zip
+unzip jasmine-standalone-1.0.2.zip
+rm jasmine-standalone-1.0.2.zip
+</code>
+This creates the basic jasmine framework in your project directory.  You can run the sample tests by opening the SpecRunner.html file in any browser.  This file is where you specify the javascript libraries that you would like to load as well as your own test and production code.
+<a href="/assets/images/2011/04/Screen-shot-2011-04-22-at-1.46.11-PM.png"><img class="aligncenter size-full wp-image-351" title="Screen shot 2011-04-22 at 1.46.11 PM" src="/assets/images/2011/04/Screen-shot-2011-04-22-at-1.46.11-PM.png" alt="" width="564" height="194" /></a>The light is green and all tests pass.  Congratulations!
+
+Inside the project directory that we created there are subdirectories called src and spec.  Src is where production js files go and spec is where we will store our test code.  Right now there are sample files in place which you can use as an example for the new project.
+
+Let's create two files, "src/app.js" and "spec/spec_app.js".  These sample files are loaded by modifying SpecRunner.html to look like this:
+
+<code lang="javascript"> <!-- include source files here... -->
+<script src="src/Player.js" type="text/javascript"></script> <script src="src/Song.js" type="text/javascript"></script>
+<script src="src/app.js" type="text/javascript"></script> <!-- include spec files here... --> <script src="spec/SpecHelper.js" type="text/javascript"></script>
+<script src="spec/PlayerSpec.js" type="text/javascript"></script> <script src="spec/spec_app.js" type="text/javascript"></script>
+</code>
+
+If we reload SpecRunner.html, there will be no failures because we have not actually added any tests at this point.  The first step in TDD is to write a test that should fail and then write just enough code to make it pass.  For this example I am going to start creating a backbone.js model.  There are a few introductory backbone.js tutorials, including <a href="http://thomasdavis.github.com/tutorial/backbone-introduction.html">this one</a> by the antipodean Thomas Davis.  For simplicity's sake, I'll be following this more <a href="http://www.plexical.com/blog/2010/11/18/backbone-js-tutorial/">barebones guide</a>.
+
+Let's create our first test in src/spec_app.js:
+<code lang="javascript">
+describe("backbone", function() {
+  it("model should have name", function() {
+      model = new Model({
+          name: 'Model A'}
+          );
+      expect(model.get('name')).toEqual('Model A');
+    });
+});
+</code>
+
+Reloading SpecRunner.html will give you the following result.
+[caption id="attachment_358" align="aligncenter" width="721" caption="Model is not defined"]<a href="/assets/images/2011/04/Screen-shot-2011-04-22-at-2.24.34-PM.png"><img src="/assets/images/2011/04/Screen-shot-2011-04-22-at-2.24.34-PM.png" alt="" title="Screen shot 2011-04-22 at 2.24.34 PM" width="721" height="240" class="size-full wp-image-358" /></a>[/caption]
+
+The fact that Model is not defined shouldn't bother us because we haven't written code to define it, yet.  That would be the next step.  In src/app.js, add the following line to start stubbing out our first model:
+<code lang="javascript">
+var Model = Backbone.Model.extend();
+</code>
+
+Unfortunately we still don't have a passing test.  We have not yet incorporated backbone.js into our project, so the code we are calling does not exist, yet.
+<a href="/assets/images/2011/04/Screen-shot-2011-04-22-at-2.21.52-PM.png"><img src="/assets/images/2011/04/Screen-shot-2011-04-22-at-2.21.52-PM.png" alt="" title="Screen shot 2011-04-22 at 2.21.52 PM" width="748" height="254" class="aligncenter size-full wp-image-356" /></a>
+
+To fix this problem we download a copy of backbone.js into our src directory with the following commands.
+<code lang="bash">
+ wget http://documentcloud.github.com/backbone/backbone.js
+mv backbone.js src
+</code>
+
+Now we will edit SpecRunner.html and add a reference to this new file.  Since we are confident that our test is being executed we can remove the example files and references from SpecRunner.html.  It should look like this:
+<code lang="html">
+ <!-- include source files here... -->
+  <script type="text/javascript" src="src/backbone.js"></script>
+  <script type="text/javascript" src="src/app.js"></script>
+  <!-- include spec files here... -->
+  <script type="text/javascript" src="spec/spec_app.js"></script>
+</code>
+
+Now we can reload SpecRunner.html and see if our test passes.  Unfortunately we still don't have a green light.  We can get more information by opening the javascript console.  This is a great way to troubleshooting fail tests because you can see console logs and debug the code interactively.  Here is what showed up in the console after executing the test.
+
+<a href="/assets/images/2011/04/Screen-shot-2011-04-22-at-2.36.12-PM.png"><img src="/assets/images/2011/04/Screen-shot-2011-04-22-at-2.36.12-PM.png" alt="" title="Screen shot 2011-04-22 at 2.36.12 PM" width="614" height="232" class="aligncenter size-full wp-image-363" /></a>
+
+The error is: "Uncaught TypeError: Cannot call method 'extend' of undefined".  Unfortunately backbone's model code seems to be missing the extend method, which is unfortunate as our code relies on it.  Fortunately other people have this problem and it has been hashed out on <a href="http://stackoverflow.com/questions/4875743/backbone-js-extend-undefined">stackoverflow</a>.  Bonebone.js has a dependency on underscore.js, an awesome little utility library.  So let's grab a copy of that and add it to our project like we did with the backbone.js file.  
+<code lang="bash">
+ wget http://documentcloud.github.com/underscore/underscore.js
+mv underscore.js src
+</code>
+
+We also need to add a reference to the library in SpecRunner.html, which should have lines that look like this:
+<code lang="html">
+  <!-- include source files here... -->
+ <script type="text/javascript" src="src/underscore.js"></script>
+  <script type="text/javascript" src="src/backbone.js"></script>
+  <script type="text/javascript" src="src/app.js"></script>
+  <!-- include spec files here... -->
+  <script type="text/javascript" src="spec/spec_app.js"></script>
+</code>
+
+Now when we reload SpecRunner.html to run our tests we finally see some green.<a href="/assets/images/2011/04/Screen-shot-2011-04-22-at-2.45.59-PM.png"><img src="/assets/images/2011/04/Screen-shot-2011-04-22-at-2.45.59-PM.png" alt="" title="Screen shot 2011-04-22 at 2.45.59 PM" width="287" height="106" class="alignright size-full wp-image-365" /></a>
+
+We have our first test passing and a framework for building a robust dynamic javascript application using a modern MVC framework.  The test first method requires some discipline but ideally ought to keep you from getting angry calls in the middle of the night.
+
+This example project can be cloned from github for your enjoyment.  
+<code lang="bash">
+git clone git@github.com:eknuth/jasmine_backbone.git
+</code>

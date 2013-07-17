@@ -1,0 +1,109 @@
+--- 
+layout: post
+title: installing bucardo the hard way
+tags: 
+- bucardo
+- linux
+- postgresql
+- replication
+- technology
+- ubuntu
+status: publish
+type: post
+published: true
+meta: 
+  _edit_last: "1"
+  _sexybookmarks_shortUrl: http://b2l.me/qxm2q
+  _sexybookmarks_permaHash: aa74ed97def9e5320c8c7050308fe3d7
+---
+<a href="/assets/images/2010/04/extinct-ibex-resurrected.jpg"><img class="alignleft size-medium wp-image-119" title="extinct-ibex-resurrected" src="/assets/images/2010/04/extinct-ibex-resurrected-300x187.jpg" alt="" width="300" height="187" /></a>It would seem that the bucardo_ctl installer script for version 4.4.0 has some problems.  I spent a little time trying to fix the script, but it was too much of a pain.
+
+I found a great <a href="http://www.richardmartin.org/2009/01/bucardo-postgresql/">write up</a> by Richard Martin that describes getting bucardo running without bucardo_ctl.  I simplified his procedure to replicate the three tables from the pgbench data that have primary keys.   From there you should be able to adopt it for any database.  You can use bucardo to replicate tables that do not have primary keys, but primary keys are generally a good thing to have.
+
+I did modify the bucardo.schema file to remove the account creation stuff.  The script tries to switch to the bucardo db as the bucardo user after it creates it and then can cause a problem with most default postgres installs that use ident auth.
+
+Feel free to download my modified <a href="http://iknuth.com/files/mod_bucardo.schema">bucardo.schema</a>.  For this example, I have used the database names 'db_left' and 'db_right'.  They are both on localhost, so we have to worry less about getting across a network.
+
+Be sure to use better passwords if you are setting this up for reals.  Please do things like use ssl/ssh tunnels.
+
+The first step is to create the databases and populate them with pgbench data.  For ubuntu 9.10 with postgresql 8.4, pgbench is in /usr/lib/postgresql/8.4/bin/
+<code lang="bash">
+createdb db_left
+createdb db_right
+pgbench -i db_left
+pgbench -i db_right
+/usr/lib/postgresql/8.4/bin/pgbench -i db_left
+/usr/lib/postgresql/8.4/bin/pgbench -i db_right
+</code>
+
+Next, run the following script in psql or your postgresql client of choice.
+<code lang="sql">
+create user bucardo SUPERUSER;
+create database bucardo owner bucardo;
+alter user bucardo with password 'bucardo';
+
+\connect db_left;
+create language plpgsql;
+
+\connect db_right;
+create language plpgsql;
+
+\connect bucardo;
+create language plpgsql;
+create language plperlu;
+\i mod_bucardo.schema
+INSERT INTO db(name, dbname, dbhost, dbuser, dbpass)
+VALUES ('left','db_left','127.0.0.1','bucardo', 'bucardo');
+INSERT INTO db(name, dbname, dbhost, dbuser, dbpass)
+VALUES ('right','db_right','127.0.0.1','bucardo', 'bucardo');
+INSERT INTO dbgroup(name) VALUES ('remote_dbs');
+INSERT INTO dbmap(db,dbgroup) VALUES ('left','remote_dbs');
+INSERT INTO dbmap(db,dbgroup) VALUES ('right','remote_dbs');
+
+INSERT INTO goat(db, schemaname, tablename, standard_conflict) VALUES('left', 'public', 'pgbench_accounts', 'source');
+INSERT INTO goat(db, schemaname, tablename, standard_conflict) VALUES('left', 'public', 'pgbench_branches', 'source');
+INSERT INTO goat(db, schemaname, tablename, standard_conflict) VALUES('left', 'public', 'pgbench_tellers',  'source');
+
+INSERT INTO herd(name) VALUES ('HERD_NAME');
+insert into herdmap(herd,goat) select 'HERD_NAME', id from goat;
+
+INSERT INTO sync(name,source,targetdb,synctype,checktime) VALUES ('left','HERD_NAME','right','swap','10 minutes');
+
+update sync set status='active' where name ='left';
+
+</code>
+
+This will set up basic replication between db_left and db_right.  To kick off the bucardo process, use the following command:
+<code lang="bash">
+sudo bucardo_ctl --dbuser='bucardo' --dbhost='localhost' --dbpass='bucardo' start "full_copy"
+</code>
+And to check the status to make sure it is running:
+<code lang="bash">
+sudo bucardo_ctl --dbuser='bucardo' --dbhost='localhost' --dbpass='bucardo' status
+Days back: 3  User: bucardo  Database: bucardo  Host: localhost  PID of Bucardo MCP: 7771
+Name Type  State PID  Last_good Time  I/U/D Last_bad Time
+====+=====+=====+====+=========+=====+=====+========+====
+left| S   |idle |7775|4m27s    |0s   |0/0/0|unknown | </code>
+
+Sorry about the backticks in those last commands.  I think that is the code snippet wordpress plugin :(
+
+To test the replication insert a record into one of the database and look for it to be replicated.
+<code lang="sql">
+\c db_left
+insert into pgbench_branches (bid, bbalance, filler) values (2, 10, 'test');
+\c db_right
+select * from pgbench_branches;
+insert into pgbench_branches (bid, bbalance, filler) values (3, 10, 'the other way');
+\c db_left
+select * from bgpench_branches;
+bid | bbalance |                                          filler
+-----+----------+------------------------------------------------------------------------------------------
+1 |        0 |
+2 |       10 | test
+3 |       10 | the other way
+(3 rows)</code>
+
+
+It may take a few seconds for the new record to show up.  There should also be a logfile in your current working directory that will have a lot of diagnostic info.
+
+And that is multimaster replication.

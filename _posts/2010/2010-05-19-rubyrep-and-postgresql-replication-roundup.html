@@ -1,0 +1,27 @@
+--- 
+layout: post
+title: rubyrep and postgresql replication roundup
+tags: 
+- django
+- linux
+- postgresql
+- replication
+- rubyrep
+- technology
+status: publish
+type: post
+published: true
+meta: 
+  _edit_last: "1"
+  _sexybookmarks_shortUrl: http://b2l.me/vjnxn
+  _sexybookmarks_permaHash: a29619b788c42daee96617b0f950d4c4
+---
+While replication might not be tightly integrated into postgresql at the moment, we are lucky to have a variety of tools.  Each one has different qualities and meets different needs.
+
+SlonyII is mature and easy enough to implement, but it does not support multi master replication.  Bucardo and rubyrep handle that requirement and definitely have different personalities.  Bucardo is written in perl and rubyrep uses ruby, so you might pick the language with which you are more comfortable.
+
+I had been impressed by how easy it was to get rubyrep up and running, but for some reason I missed it's ability to handle continuous replication using triggers.  Luckily rubyrep's author Arndt Lehmann set me straight with a comment to my misguided post.  We are currently implementing rubyrep to replicate a very large django database and I have been very pleased with the results.
+
+I have noticed one interesting quick with rubyrep that we did not see with bucardo.  I'm still analyzing the situation and will submit a bug report to rubyrep or postgres.  I am using the same database backup to load the two databases to different servers.  I noticed that rubyrep was finding a huge amount of record mismatches regarding time/data data.  The only that was different between the two servers was the timezone.  One was set to UTC and the other Pacific.  Fixing the tz mismatch and restarting postgres has taken care of the problem.
+
+While this would a problem going into production, rubyrep actually was able to sync these records very easily.  It painless synced the hundreds of thousands of records without breaking a sweat.  I was very impressed.

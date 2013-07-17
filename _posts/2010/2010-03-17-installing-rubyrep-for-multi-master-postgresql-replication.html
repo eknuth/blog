@@ -1,0 +1,64 @@
+--- 
+layout: post
+title: using rubyrep to replicate a postgresql database on ubuntu 9.10 (karmic koala)
+tags: 
+- bucardo
+- django
+- linux
+- postgresql
+- rubyrep
+- technology
+status: publish
+type: post
+published: true
+meta: 
+  _edit_last: "1"
+  _sexybookmarks_shortUrl: http://b2l.me/qxm2u
+  _sexybookmarks_permaHash: 04cedd084b0a3ee6a695d4d1e0b034d6
+---
+<a href="http://www.rubyrep.org"><img class="alignleft" title="rubyrep" src="http://iknuth.com/images/rubyrep.png" alt="rubyrep" width="107" height="79" /></a> <strong>Update: </strong>I was mistaken about rubyrep's ability to support continuous replication.  <a href="http://iknuth.com/2010/05/rubyrep-and-postgresql-replication-roundup/">See my new post for an update</a>.<strong> </strong>
+
+<strong></strong>For my current project, we need to replicate a <a href="http://www.postgresql.org/">postgresql</a> 8.4 database between several sites.  We are looking at <a title="bucardo" href="http://bucardo.org/">bucardo</a> and <a href="http://www.rubyrep.org">rubyrep</a>.  Both projects support a multiple master architecture.  I'm going to give rubyrep a shot, and then try bucardo.  I'll be using <a href="http://ubuntu.com">ubuntu</a> 9.10 karmic koala, but we'll be using debian in production.  We'll be replicating a fairly large <a href="http://www.djangoproject.com/">django</a> database between two sites.
+<h3>Slony-I</h3>
+<a href="http://www.slony.info/">Slony</a> isn't the only technology out there for doing replication of a postgres database.  Looks like two relatively new projects are being developed  that might be better for certain instances.  We couldn't use slony because it is does not support bidirectional synchronization.  Slony only allows you to have a single master and multiple slaves.  For our purposes we have to have multiple masters.
+<h3>Setup</h3>
+rubyrep is obviously written in ruby, and you can choose from standard and jruby version.  The java ruby variant is supposed to be a bit faster, but I just want to see how it works.  To test, I'll be installing it on for two databases on a single server.
+Assuming you have ruby installed, you can install rubyrep with the following command:
+<blockquote>sudo gem install rubyrep</blockquote>
+This installed version 1.1.1 of rubyrep.  The next step is to generate a stub config file using the rubyrep command.  The <a href="http://www.rubyrep.org/scanning.html">tutorial</a> does not specify the path, and gem didn't add it to the default path.  For my setup the rubyrep script can be called like:
+<blockquote>/var/lib/gems/1.8/bin/rubyrep generate bh_rubyrep.conf</blockquote>
+This will generate a sample config file that you can edit to specify your database and server settings.  My databases are both on localhost for this test.  I uncommented the following to specify syncing all tables:
+<blockquote>
+<div id="_mcePaste">config.include_tables /./ # regexp matching all tables in the database</div></blockquote>
+<div>The /./ is just a regex to match table names.</div>
+<h3>Execution</h3>
+The first step is to do a scan of the databases:
+<blockquote>
+<div>/var/lib/gems/1.8/bin/rubyrep scan -c bh_rubyrep.conf</div></blockquote>
+<div>I haven't created the right hand database, so I got a fatal error stating it didn't exist.  I created the second database and ran the command again, but it gave no output.  It should list all the tables with a count of mismatched records.  Unfortunately my right hand database is empty.  I dumped the left hand database and restored to the the right.</div>
+<div>I ran the scan again and got a nice list of tables with zero mismatches.  We are going to be replicating the database of a relatively large postgres application.  With both databases running under a virtualbox vm on a macbook pro, it took 1 min 24 seconds to scan an 18mb database.  All tables have primary keys defined, which helps our cause.</div>
+<blockquote>
+<div>
+<div>eknuth@eknuth-vubuntu:~/rubyrep$ time /var/lib/gems/1.8/bin/rubyrep scan -c bh_rubyrep.conf</div>
+<div>purchasing_purchaseancillary 100% .........................   0</div>
+<div>orders_orderline 100% .........................   0</div>
+<div>orders_orderstatus 100% .........................   0</div>
+<div>...</div>
+<div>
+<div>auth_user 100% .........................   0</div>
+<div>navigation_pinnedtab 100% .........................   0</div>
+<div>navigation_tab 100% .........................   0</div>
+<div>real<span style="white-space: pre;"> </span>1m23.323s</div>
+<div>user<span style="white-space: pre;"> </span>1m4.708s</div>
+<div>sys<span style="white-space: pre;"> </span>0m8.533s</div>
+</div>
+</div></blockquote>
+<div>To test the syncronization, I deleted all the records from one of the tables and ran the sync command:</div>
+<blockquote>
+<div>time /var/lib/gems/1.8/bin/rubyrep sync -c bh_rubyrep.conf</div></blockquote>
+<div>rubyrep picked up the missing 8000 records and recreated them in the rh database.  Very slick and it did not take measurably longer than the scan.</div>
+<h3>Conclusions</h3>
+I'm very impressed with the ease of setup.  It really was incredibly painless, in keeping with rubyrep's slogan.  There are more complicated sync and conflict resolution rules you can set up, but the basic config was done very quickly.
+<div>Unlike slony, which uses triggers to sync the data, rubyrep would be the sort of thing you run periodically out of a cron job.  I'm not sure if that will work for us.</div>
+<div>rubyrep seems like an excellent way to do postgres replication.  It would also allow you to replicate data between mysql and postgres, which is kinda cool.</div>
+<div>I also think that rubyrep is probably one of the best postgres data comparison tools available.  It seems well suited for that type of use.</div>

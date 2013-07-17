@@ -1,0 +1,56 @@
+--- 
+layout: post
+title: bulk loading shapefiles into postgis
+tags: 
+- civicapps
+- geodatabase
+- gis
+- postgis
+- postgresql
+- spatial database
+- technology
+status: publish
+type: post
+published: true
+meta: 
+  _edit_last: "1"
+  _sexybookmarks_shortUrl: http://b2l.me/xkjvj
+  _sexybookmarks_permaHash: 4798dbef0793e341875b8f9acfa5f331
+---
+<a href="http://civicapps.org"><img class="alignleft" src="http://civicapps.org/sites/civicapps.org/themes/civicapps/images/logo.png" alt="civicapps" width="246" height="84" />Civicapps</a> datasets are made available in a format called a shapefile.  ESRI shapefiles are the de facto standard for distributing spatial data, but they can be tricky for those who are new to GIS.  Fortunately shapefiles are an open standard with a variety of useful tools available.
+<h1>Shapefiles and Spatial Databases</h1>
+One approach to using a shapefile in an application is to load it into a relational database that supports spatial features like PostgreSQL/PostGIS, SQL Server 2008 (with or without ArcSDE), SQLite/Spatialite, Oracle and even MySQL.  These products are sometimes referred to as spatial or geodatabases.  Some implementations are more mature and useful than others.
+
+<img class="alignright" title="postgis" src="http://postgis.refractions.net/download/logo_suite/stock_elephant/stock_elephant_060.gif" alt="" width="58" height="86" />I'm using <a href="http://postgis.refractions.net/">PostGIS</a> for this example and the ogr tools which ship with the ubuntu gdal-bin package.  These tools are being developed as part of the <a href="http://www.opengeospatial.org/">Open Geospatial Consortium</a> and are capable of doing incredible things, especially when compared to the commercial offerings.
+<h1>Getting at the data</h1>
+<a href="/assets/images/2010/05/bridges.png"><img class="alignleft size-medium wp-image-223" title="bridges" src="/assets/images/2010/05/bridges-300x227.png" alt="bridges" width="300" height="227" /></a>After you unzip the archive you are left with several different files including a .shp file, a .prj file and a .dbf file.  The geographic features are not stored as longitude and latitude, but a coordinate system specific to Northern Oregon called State Plane with units in Feet.  The projection information is in the .prj file.
+<h2>Spatial Transformations</h2>
+First we have to project the data from State Plane which is commonly used by state and local governments to the standard web mapping coordinate system, WGS1984.  This projection works very well with the google maps api and uses latitude and longitude.  We will employ a tool called ogr2ogr to do the reprojection.  It will create a new shapefile called Bridges_pdx_4326.shp in the WGS84 coordinate system which is designated by a spatial reference id of 4326.
+<code lang="bash">
+ogr2ogr -t_srs EPSG:4326 -a_srs EPSG:4326 -f "ESRI Shapefile" Bridges_pdx_4326.shp Bridges_pdx.shp
+</code>
+<h2>Creating the Database</h2>
+Now, we need to create a postgis database and load it from the shapefile.  We'll be using the command shp2pgsql which comes with postgis and psql the command line interface to postgres to do the dirty work.  It's really not that bad and lends itself to being automated with a shell script.
+<code lang="bash">
+edwin@iknuth.com:~/civicapps$ createdb civicapps
+edwin@iknuth.com:~/civicapps$ createlang plpgsql civicapps
+edwin@iknuth.com:~/civicapps$ psql civicapps -f /usr/share/postgresql/8.4/contrib/postgis.sql
+edwin@iknuth.com:~/civicapps$ psql civicapps -f /usr/share/postgresql/8.4/contrib/spatial_ref_sys.sql
+</code>
+<h2>Loading the Data</h2>
+Now we load our projected data into postgres.  We are using a few command line options to specify the name of the table as "bridges_pdx" and the name of the column storing the features as "the_geom".  You can use whatever naming conventions you like.
+<code lang="bash">
+shp2pgsql -s 4326 -d -g the_geom Bridges_pdx_4326.shp bridges_pdx |psql civicapps
+</code>
+
+If you run the command without piping it to psql, you see that it outputs the sql necessary to create a table and insert the data to populate it.  This whole process is highly scriptable and can be used to bulk load many shapefiles at once.
+<h2>Working with PostGIS</h2>
+To look at the data, we can connect to the database and run some queries.  PostGIS includes many functions that implement gis operations in sql.  We can use this command to generate kml directly from our database.
+<code lang="sql">
+select ST_AsKML(the_geom) from bridges_pdx;
+</code>
+
+Most spatial databases implement at least some of the <a href="http://www.opengeospatial.org/standards/sfs">OpenGIS Simple Features Implementation Specification for SQL</a>.  Using these functions, we can make queries and relate tables at the database level based on the spatial location of the features using SQL or object-relational mapping.  This is a very powerful tool for developing GIS applications.
+
+I hope that helps people get started with shapefiles and postgis.  I'll be writing more about civicapps and working with spatial data in the future  I appreciate your interest.
+[ad] 

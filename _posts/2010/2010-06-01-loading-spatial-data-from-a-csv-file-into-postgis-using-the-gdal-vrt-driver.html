@@ -1,0 +1,26 @@
+--- 
+layout: post
+title: loading spatial data from a csv file into postgis using the gdal vrt driver
+tags: 
+- uncategorized
+status: draft
+type: post
+published: false
+meta: 
+  _edit_last: "1"
+---
+Some of the civicapps data is distributed in csv files.  To load a csv file
+
+<code lang="xml">
+address_data.csv
+wkbPoint
+EPSG:102726
+
+
+
+</code>
+
+<code lang="bash"> </code>
+
+<code lang="bash">ogr2ogr -overwrite -a_srs "EPSG:4326" -t_srs "EPSG:4326" -f "PostgreSQL" PG:"host=localhost user=user dbname=civicapps password=*****" address.vrt -nln address_data
+</code>

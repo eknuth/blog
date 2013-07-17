@@ -1,0 +1,100 @@
+--- 
+layout: post
+title: deploying a django app to heroku with easy static files on s3
+tags: 
+- aws
+- django
+- git
+- heroku
+- python
+- s3
+- technology
+status: publish
+type: post
+published: true
+meta: 
+  _edit_last: "1"
+  _sexybookmarks_shortUrl: http://bit.ly/nJlmwX
+  _sexybookmarks_permaHash: adafb0b64438788626b55cf177697a27
+---
+<h1>django and s3</h1>
+This project doesn't necessarily require heroku, but I've been interested in the service as an easy way to deploy apps. I really like the idea of not having to set up a server with nginx, postgres, gunicorn, etc.  The convenience of deploying just by pushing from git is awesome.  
+
+One issue I ran into was a problem with serving static content like css, javascript and image files from heroku.  I'm sure it is just a configuration problem, but this solution of using s3 to serve those files is the way you want to go in the long run.
+
+You can clone my sample project from <a href="https://github.com/eknuth/django-heroku-s3-bootstrap-demo">github</a>.
+
+<code>git clone git@github.com:eknuth/django-heroku-s3-bootstrap-demo.git</code>
+<h2>Django on Heroku</h2>
+Heroku used to be limited to ruby apps, but it has recently become much more flexible with the addition of the cedar stack.  Now it supports python 2.7 and uses pip to install modules from a standard requirements.txt file.  They have also started offering a free 5mb postgresql db to go along with their current freemium offering, which is fantastic.  That doesn't sound like a lot of space, but you'd be surprised how much information you can cram into 5 mb.
+<h2>Initial Setup</h2>
+You can follow the django instructions from heroku here:
+<a href="http://devcenter.heroku.com/articles/django">http://devcenter.heroku.com/articles/django</a>
+
+If you are using macosx, or virtualenv uses python 2.6 by default, I would suggest specifying 2.7 when you create the environment.  Heroku is using 2.7 and will complain about pip installing importlib which was not included by default in python 2.6.
+
+<code>virtualenv --no-site-packages . -p /usr/local/bin/python2.7
+</code>
+Open the site on heroku using the "heroku open" command and verify that you get the django welcome screen.  You should have no urls configured.
+<h2>Admin and Static Files</h2>
+You should now have a working empty project.  Let's turn on the django admin app and fire up the development server.
+
+As a side note, this config will import settings from settings_local.py, if it exists and overwrite the ones in settings.py.  This local settings file is not committed to the repo and won't get deployed to heroku.
+
+Follow the instructions to <a href="https://docs.djangoproject.com/en/dev/ref/contrib/admin/" target="_blank">install the django admin app</a> and then run manage.py syncdb and then runserver.  If everything went ok, you should be able to log in to your admin console.
+
+Now, commit and push your app to heroku.  Run the manage.py commands on heroku and magically your admin console is live on the web.
+<h2>Twitter Bootstrap and view</h2>
+Now, lets getting started with a template and a home view.  We can use the totally awesome <a href="http://twitter.github.com/bootstrap/" target="_blank">twitter bootstrap project</a>.  They have released a site/webapp html template, css and javascript package that provides everything you need to get started.  It is great for those that are less inclined to design.
+
+Create a templates folder in your project root.  Clone the project from github and copy hero.html from the examples directory into your new templates directory.
+<h3>@render_to</h3>
+Now let's create a view and wire up that template to a url.  Now is the time to add on a django project that will make things easier for us.  I really love the render_to decorator from <a href="https://bitbucket.org/offline/django-annoying/wiki/Home" target="_blank">django-annoying</a>.  Run "pip install django-annoying", and it will be ready to go.  Don't forget to save your updated requirements with a "pip freeze &gt;requirements.txt".
+<h3>relative paths</h3>
+Add the template dir and a little snippet of python to use relative paths.  This will make life easier in the future.
+<script src="https://gist.github.com/1289991.js?file=settings.py"></script> In the urls.py file, uncomment the following home view:  url(r'^$', 'om.views.home', name='home'),  And create a views.py file to grab the template and render it.  <script src="https://gist.github.com/1289996.js?file=views.py"></script>
+
+Now when you open the app on your development server, you get an actual "hello world" page.  Unfortunately we are missing the css file, so it is unstyled.  In your root project, create a static folder and inside that create another folder named css.  Copy bootstrap.css into static/css.
+
+To reference this css file, edit hero.html and change the line with bootstrap.css to this:
+<code>
+&lt;link href="{{ STATIC_URL }}css/bootstrap.css" rel="stylesheet"&gt;
+</code>
+In order to make the STATIC_URL template tag work, we need to update STATICFILES_DIRS in settings.py to:
+<code>
+STATICFILES_DIRS = (        os.path.join(SITE_ROOT, 'static'),)
+</code>
+
+We also need add some template context processors with this:
+<code>
+TEMPLATE_CONTEXT_PROCESSORS = (
+'django.contrib.messages.context_processors.messages',
+'django.contrib.auth.context_processors.auth',
+'django.core.context_processors.static',
+)
+</code>
+
+When we open the page served from our development server, we are good to go.  The page is styled and looks awesome.
+<h2>Static Files on Heroku</h2>
+Unfortunately when we push to heroku and open the page, we are back to the our css free look.  Seems like heroku has no problem serving up the admin static files, but it has a problem finding our static directory.  I'm sure it is just a matter of configuration, but honestly we really don't want to use our application server to serve up static files anyway.  Images, css and javascript should all be coming out of something fast and light.
+<h2>Enter S3</h2>
+Amazon provides an excellent service for doing just that.  Amazon's web services and the simple storage system are cheap and easy to use.  There is also an excellent module for using s3 with django's static files app and the collectstatic management command with s3 as a backend.  <a href="http://code.welldev.org/django-storages/">django-storages</a> makes it incredibly simple to use s3 for our static files.
+<h3>django-storages and boto</h3>
+First we want to install the module with "pip install django-storages" and add 'storages' to your INSTALLED_APPS tuple and set your storage type with:
+<code>
+STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+</code>
+We will also need to install boto, the python module for dealing with s3.  Use "pip install boto" for that.
+Log in to the amazon web services management console and create a new bucket.  Add the name of the bucket and your access keys to settings.py like this:
+<code>
+AWS_ACCESS_KEY_ID = 'ACCESS KEY'
+AWS_SECRET_ACCESS_KEY = 'SECRET'
+AWS_STORAGE_BUCKET_NAME = 'django-blog
+</code>
+<h3>set up the s3 bucket</h3>
+Look at the bucket properties and grab the url for the bucket.  Update your STATIC_URL setting to point to the bucket.  In this case it will look like this:
+<code>
+STATIC_URL = 'https://s3.amazonaws.com/django-blog/'
+</code>
+<h3>deployment</h3>
+Now run manage.py collectstatic and you will see all the files being copied to your bucket.  Freeze your requirements file and commit your repo.  Now when you push to heroku, you should see your website with the bootstrap.css file pulled from s3.

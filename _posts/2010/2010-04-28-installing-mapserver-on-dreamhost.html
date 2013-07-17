@@ -1,0 +1,39 @@
+--- 
+layout: post
+title: Installing Mapserver on Dreamhost
+tags: 
+- technology
+status: draft
+type: post
+published: false
+meta: 
+  _edit_last: "1"
+---
+I've used dreamhost for a number of years and in general I've been pretty happy.  They provide a decent linux host with just about everything you need to do web stuff.  I'd prefer postgres to mysql, and it'd be nice to have tomcat, but that sort of thing is available with their virtual server.  
+
+If I can't have geoserver on dreamhost, I'd at least like mapserver.  Without root access, it's possible to compile and install it from source.  
+
+I seem to remember a <a href="http://www.perrygeo.net/wordpress">perrygeo</a> post on that subject, but I can't seem to find it right now.  It is a fairly straightforward process, following the steps from the <a href="http://marwp.cla.umn.edu/gis/docs/verbose_install.html#installing_mapserver">verbose linux install</a>.  
+
+You have to make a few changes to install the newly compiled software to a location other than root.  I've chosen /home/eknuth/install for the location of the binaries.  When the instructions call for you to run <i>./configure</i>, add <i>--with-prefix=/home/eknuth/install</i> to the statement.  
+
+<strong>Install Prerequisites</strong>
+Download the latest stable gdal source from <a href="http://trac.osgeo.org/gdal/wiki/DownloadSource">http://trac.osgeo.org/gdal/wiki/DownloadSource</a> and put it in a built folder.  I used <i>/home/eknuth/build</i>.  Uncompress it and cd to the gdal folder.
+
+Configure:
+<code> 
+./configure \
+ --with-png \
+ --with-libtiff \
+ --with-jpeg \
+ --with-gif \
+ --with-geos \
+ --build=i686-pc-linux-gnu \
+ --host=i686-pc-linux-gnu \
+ --prefix=/home/eknuth/install
+</code>
+Build and Install:
+<code>
+make
+make install
+</code>

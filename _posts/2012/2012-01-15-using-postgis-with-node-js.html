@@ -1,0 +1,36 @@
+--- 
+layout: post
+title: using postgis with node.js
+tags: 
+- node.js
+- postgis
+- seatMate
+- technology
+- trimet
+status: publish
+type: post
+published: true
+meta: 
+  _edit_last: "1"
+  _canonical: ""
+---
+I've written my spatial query and it returns a an array of the 10 route lines that are closest to a point. My query retrieves the route number, description and distance in decimal degrees. I've projected the trimet data to the WGS84 projection, which is what we usually get from a GPS.
+<h3>a note about projections and web mapping</h3>
+I'm sure that the GIS people are nervous about my cavalier treatment of projections. I didn't mention anything about spheres vs spheroids or anything like that.  If we were doing serious analysis it would be unacceptable to pay so little attention to the underlying data. However we are building a web app where speed and ease of use trumps accuracy. There are compromises that have to be made for this sort of thing. It is good to be aware of the tradeoffs, but I'm not too concerned.
+<h2>a trimet node module and git branches</h2>
+I've added a some node module to the repo to hold the server side application code for interacting with postgis and the trimet data. I haven't worried too much about organizing my code, yet, but it seems like a good time to impose some structure. I've also added a test directory and an integration test that actually runs the query against our database and verifies that we get the expected results. This will come in handy as things get more complicated.
+<h3>git flow and development branches</h3>
+You may also notice that the <a href="https://github.com/eknuth/seatMate/" target="_blank">git repo</a> contains a <a href="https://github.com/eknuth/seatMate/tree/develop" target="_blank">develop branch</a> in addition to our master. The master branch holds our current stable deployed code, and new code gets added to develop.
+
+When I am ready to release I merge the develop branch into master to be deployed.  Git makes it easy to branch and merge.  I'm also using the <a href="http://nvie.com/posts/a-successful-git-branching-model/" target="_blank">flow extension to git</a> to make it easy to manage the branches.  I highly recommend this approach.
+<h3>trimet node.js module</h3>
+In the development branch, I've added a new javascript file called <a href="https://github.com/eknuth/seatMate/blob/develop/lib/trimet.js" target="_blank">lib/trimet.js</a>.  It exports one function to our server that takes a latitude and longitude and returns a list of routes from the postgis database.  It is using the <a href="https://github.com/brianc/node-postgres" target="_blank">node-postgres module</a> by Brian Carlson and used in production at places like <a href="https://www.yammer.com/" target="_blank">yammer</a>.
+
+This integration test demonstrates the use of trimet.getRoutesByPoint, our first module function.  It uses <a href="https://github.com/visionmedia/mocha" target="_blank">mocha</a>, an excellent node test framework that I wrote about in article on <a href="http://iknuth.com/2011/12/exploring-node-redis-in-node-js-using-the-mocha-testing-framework-2/" title="exploring redis in node.js using the mocha testing framework" target="_blank">asynchronous tests with node and redis</a>.
+
+<h3>preventing sql injection attacks</h3>
+Note that I am creating the query string by concatenating the coordinates.  This opens us up to sql injection attacks and should raise a <a href="http://xkcd.com/327/" target="_blank">red flag for security</a>.  The node postgres module supports parameter replacement, but I was running into trouble with that.  
+
+In order to prevent random sql from being executed on our database, I'm testing to make sure our latitude and longitude are actually numbers before passing them to the module.  Really this method should fail if we pass it anything but numbers.  We'll address that later.
+<script src="https://gist.github.com/1617156.js?file=test_trimet.js"></script>
+

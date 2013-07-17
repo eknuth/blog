@@ -1,0 +1,36 @@
+--- 
+layout: post
+title: deploying bucardo and solving a schema mismatch problem
+tags: 
+- bucardo
+- django
+- linux
+- postgresql
+- replication
+- technology
+status: publish
+type: post
+published: true
+meta: 
+  _edit_last: "1"
+  _sexybookmarks_shortUrl: http://b2l.me/rpmu8
+  _sexybookmarks_permaHash: ec8ec462864076aa904d84508355f48d
+---
+In the process of deploying bucardo 4.4.0 to replicate a fairly large django database using postgresql 8.4, I ran into a tricky issue.  Although I knew for certain that the database schemas were identical, bucardo still complained about a mismatch in the default value for the first table's primary key column.
+
+For some reason bucardo was identifying the reference to the sequence with the "public" schema explicitly named on one database and without "public" on the other.  In this case, schema refers to a namespace and not the database layout sense of the word.  The goat validation was throwing the following error.
+<code lang="bash">
+...
+MCP Warning: Source database for sync "databaseA" has column "id" of table "public.auth_group" with a DEFAULT of "nextval('auth_group_id_seq'::regclass)", but target database "databaseB" has a DEFAULT of "nextval('public.auth_group_id_seq'::regclass)"
+...
+</code>
+
+I was sure that the databases were identical because they were both restored from the same backup file.  I did find that I was running 8.4.1 on one postgresql server and 8.4.3 on the other. I synced up the postgresql versions, but I did not track down any of the relevant driver versions, because I was able to find a simple work around.
+
+I searched for the error string in the bucardo perl source code and found the problematic section.  Since I knew the tables were identical, I felt that skipping this part of the validation would be harmless, so I made the following change to Bucardo.pm
+<code lang="perl">
+2032     #if ($scol->{atthasdef} and $fcol->{atthasdef} and $scol->{def} ne $fcol->{def}) {
+2033     if (1 == 2) {
+</code>
+
+After I installed my updated bucardo, I kicked off replication again with a successful result.  

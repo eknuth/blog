@@ -1,0 +1,39 @@
+--- 
+author: Edwin Knuth
+layout: post
+title: using socket.io to connect sencha to node and postgis
+tags: 
+- javascript
+- mobile
+- postgis
+- seatMate
+- sencha
+- technology
+- trimet
+status: publish
+type: post
+published: true
+meta: 
+  _canonical: ""
+  _edit_last: "1"
+---
+<a href="/assets/images/2012/01/Screen-shot-2012-01-15-at-3.24.11-PM.png"><img class="alignright size-medium wp-image-541" title="Screen shot 2012-01-15 at 3.24.11 PM" src="/assets/images/2012/01/Screen-shot-2012-01-15-at-3.24.11-PM-250x300.png" alt="working sencha trimet route view" width="250" height="300" /></a>Now that we've got node connected to our postgis database, we need to pull the route information into our sencha mobile web app.
+
+I've pushed this version to the github repo, but I haven't deployed it to nodejitsu, just yet.  <a title="postgis hosting service" href="https://www.ganeshdb.com" target="_blank">My postgis hosting service</a> requires that ssl be enabled, which is supported by the native version of the postgres module.  Unfortunately I can only get the pure js api to work on nodejitsu.
+
+Rather than using jQuery or even Ext to make ajax requests, I'm going to be using <a href="http://socket.io" target="_blank">socket.io</a>, which is a websocket like implementation for node.
+<h3>passing around data with socket.io</h3>
+We are triggering the 'get-routes' socket.io event on the backend, which takes a lat/lon and returns a list of routes to the callback.  This allows the view to be updated asynchronously by adding the new routes to the store and refreshing the display.
+
+<script src="https://gist.github.com/1617988.js?file=refreshroutes.js"></script>
+
+socket.io uses a variety of means of communication to send and receive events and objects between the web app and the server.  If web sockets aren't available it falls back to flash sockets, comet style long polling and a variety of other mechanisms.
+<h3>sencha geolocation and data request</h3>
+I've added in the geolocation api that is part of sencha.  The app is refreshing the routes when it has a lock on the gps.  Sencha's geolocation api makes this sort of thing easy.  Note that I'm not really handling any errors here, and they definitely could crop up. The following goes into the app's onReady method.
+
+<script src="https://gist.github.com/1617988.js?file=geolocation.js"></script>
+
+<h2>project status and next steps</h2>
+I've got the routes view rendering and I've added disclosure icons that switch the focus to the comments view.  I gave up on putting the map on the start screen because I had some trouble getting those components to share a card.  The next arrival bar on the bottom is mocked up for now and will require additional backend work.
+
+I'm also thinking of scrapping comments and just focusing on the other two components.  That would free up some space on the toolbar and reduce the scope of the project.  My next step is to split the chat channels based on trimet routes and wire up that view.

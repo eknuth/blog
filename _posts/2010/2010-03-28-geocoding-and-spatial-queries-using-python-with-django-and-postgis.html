@@ -1,0 +1,41 @@
+--- 
+layout: post
+title: geocoding and spatial database queries using python with django and postgis
+tags: 
+- django
+- geodatabase
+- geodjango
+- gis
+- google maps api
+- location based service
+- postgis
+- postgresql
+- spatial database
+- technology
+status: publish
+type: post
+published: true
+meta: 
+  _edit_last: "1"
+  _sexybookmarks_shortUrl: http://b2l.me/qxm2s
+  _sexybookmarks_permaHash: 364cc36676ac2e6e0c9e6b905b6de26a
+---
+Python is an excellent language for developing GIS applications.  It's very easy to create a web service that <a href="/assets/images/2010/03/stock_elephant_060.gif"><img class="alignright size-full wp-image-86" title="stock_elephant_060" src="/assets/images/2010/03/stock_elephant_060.gif" alt="postgis" width="100"  /></a>queries a spatial database and returns a result.  Sometimes that sort of thing is called a location based service.  They are common in mobile applications, including iphone apps.  For our purposes, latitude and longitude are just inputs to a function.
+
+Geocoding is the act of turning street addresses into coordinates on a map.  A geocoding service takes an address or a more generic reference to streets and returns a latitude and longitude that can be plotted on a map.  Reverse geocoding takes a point and returns an address, but we won't be going into that here.
+
+Google provides an excellent geocoding service that has a flexible address matching algorithm and provides  accurate results.  It can be used in python by way of the<a href="http://code.google.com/p/geopy/"> geopy</a> module.  The module can also query other geocoding services like yahoo and microsoft, but google does a good job and works well with the <a href="http://code.google.com/apis/maps/">Google Maps API</a> and base layer.  The syntax to look up a location by the street address is simple.
+
+<a href="/assets/images/2010/03/stock_elephant_060.gif"></a>This example also includes using that geocoded address to look up the Portland neighborhood in which the point is located.  To do this we must have a <a href="http://geodjango.org/">geodjango</a> model loaded in a <a href="http://postgis.refractions.net/">postgis</a> or other spatial database or geodatabase as they are sometimes called.
+
+<code lang="python">
+from django.contrib.gis.geos import Point
+from models import Neighborhood
+from geopy import geocoders
+api_key='AAJJDJDJSJ....'
+
+g = geocoders.Google(api_key)
+place, (lat, lon) = g.geocode(address)
+pnt = Point(lon,lat)
+n = Neighborhood.objects.get(poly__intersects=pnt)
+</code>

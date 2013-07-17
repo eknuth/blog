@@ -1,0 +1,96 @@
+--- 
+layout: post
+title: displaying a google maps api v3 map in a django application with geodjango and postgis
+tags: 
+- django
+- geodatabase
+- geodjango
+- gis
+- google maps api
+- location based service
+- postgis
+- postgresql
+- spatial database
+- technology
+status: publish
+type: post
+published: true
+meta: 
+  _edit_last: "1"
+  _sexybookmarks_shortUrl: http://b2l.me/qxknp
+  _sexybookmarks_permaHash: 192cba38caf88ea66051fe859d6dbb05
+  _wp_old_slug: displaying-a-google-maps-api-v3-map-in-a-django-application-with-geodjango
+---
+<a href="/assets/images/2010/04/Screen-shot-2010-04-20-at-1.01.39-AM.png"><img src="/assets/images/2010/04/Screen-shot-2010-04-20-at-1.01.39-AM.png" alt="" title="Screen shot 2010-04-20 at 1.01.39 AM" width="227" height="140" class="alignleft size-full wp-image-143" /></a>In order to create a <a href="http://code.google.com/apis/maps/documentation/v3/">Google Maps API v3</a> map with django templates and views you can use the python modules <a href="http://code.djangoproject.com/browser/django/trunk/django/contrib/gis/map">django.contrib.gis.maps</a> and specifically <a href="http://code.djangoproject.com/browser/django/trunk/django/contrib/gis/maps/google">django.contrib.gis.maps.google</a>.
+
+We will create a view called show_map that takes a request object and a query string that we will use to retrieve polygons from postgis, our spatial database.
+
+If we have a database of time zones and we would like to display a map with a specific time zone, we first need to select it from the database.  For this query, we are using the standard django ORM to pull out the desired polygon.  We have defined the Zone object in our app's models.py file.
+<h3>querying the geodatabase using django ORM</h3>
+<code lang="python">
+In[24]: results = Time_Zone.objects.filter(timezone_id=query_string)
+</code>
+
+timezone_id is the criteria we are using to select all objects where the time zone id matches the query string exactly.
+
+The geometry or polygon shapes of the records that have been returned are available in the polygon field you have specified in the model definition.  Because we are using the filter method of Zone's object manager, we can pull multiple records that match our search criteria.  We can get at the polygon data for each record using some properties that are available on the geometry columns.
+<h3>geojson</h3>
+<code lang="python">
+In[24]:  print results[0].geom.geojson
+Out[24]:  '{ "type": "MultiPolygon", "coordinates": [ [ [ [ -6.091862, 4.991835 ], [ -6.089009, 4.990883 ], [ -6.079963, 4.988334 ], [ -6.074483, 4.985070 ], [ -6.071546, 4.979528 ], [ -6.072025, 4.977002 ], [ -6.076686, 4.968072 ], [ -6.083112, 4.967894 ], [ -6.100063, 4.971250 ], [ -6.103525, 4.968749 ], [ -6.107572, 4.978899 ], [ -6.113694, 4.987916 ], [ -6.113905, 4.990215 ], [ -6.112429, 4.991211 ], [ -6.105550, 4.991084 ], [ -6.099033, 4.994057 ], [ -6.091862, 4.991835 ] ] ] ] }'
+</code>
+<h3>kml</h3>
+<code lang="python">
+In [25]: results[0].geom.kml
+Out[25]: '
+
+-6.09186172485,4.99183511734,0 -6.08900928497,4.99088335037,0 -6.07996273041,4.98833370209,0 -6.07448291779,4.98507022858,0 -6.07154560089,4.97952795029,0 -6.07202482224,4.97700214386,0 -6.07668590546,4.9680724144,0 -6.08311223984,4.9678940773,0 -6.10006284714,4.97125005722,0 -6.10352468491,4.96874904633,0 -6.1075720787,4.97889947891,0 -6.11369419098,4.98791646957,0 -6.113904953,4.99021482468,0 -6.11242866516,4.9912109375,0 -6.10554981232,4.99108362198,0 -6.09903335571,4.9940571785,0 -6.09186172485,4.99183511734,0'
+</code>
+<h3>google maps api</h3>
+In order to display the polygons on our google map, we will need to pass them to our code written in javascript.  We will then use methods from the google maps api v3 to construct and display our polygons on the map.  We will also need a little more information about the polygons we will be displaying in order to adjust the center and zoom level of our map.
+
+First we will need to instantiate a google zoom object.  There are probably easier ways to do this, perhaps subclassing the geodjango admin views, but this is quick and effective.  And then render our template with the appropriate context.
+<code lang="python">
+gz = GoogleZoom()
+return render_to_response('map.html', {
+'all_tz': all_tz,
+'zoom': gz.get_zoom(all_tz.unionagg())
+})
+</code>
+<h3>template javascript</h3>
+To display our maps using google's javascript mapping API, we need to initialize our map and the add our polygons to it.  We will iterate through our list of polygons use the gpoly method of our Time_Zone object to definte the points that make up each polygon.  We'll talk about the gpoly method in a bit.
+<code lang="javascript">
+function initialize() {
+var latlng = new google.maps.LatLng({{ results.unionagg.centroid.y}},
+{{ results.unionagg.centroid.x}});
+var myOptions = {
+zoom: {{ zoom }},
+center: latlng,
+mapTypeId: google.maps.MapTypeId.TERRAIN
+};
+var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions)
+{% for result in results %}
+polygon = new google.maps.Polygon({
+paths: {{ result.gpoly }},
+strokeColor: "#FF0000",
+strokeOpacity: 0.8,
+strokeWeight: 2,
+fillColor: "#FF0000",
+fillOpacity: 0.35
+});
+polygon.setMap(map);
+{% endfor %}
+</code>
+<h3>google.maps.Polygon</h3>
+A google.maps.Polygon object is slightly different from a geojson representation.  They are both a string containing a list of points that represent the vertices of the polygon.  The geojson polygon that is displayed above needs to be transformed into the following string to be interpretable by the google Polygon constructor.
+<code lang="python">
+'[new google.maps.LatLng(4.99183511734,-6.09186172485),new google.maps.LatLng(4.99088335037,-6.08900928497),new google.maps.LatLng(4.98833370209,-6.07996273041),new google.maps.LatLng(4.98507022858,-6.07448291779),new google.maps.LatLng(4.97952795029,-6.07154560089),new google.maps.LatLng(4.97700214386,-6.07202482224),new google.maps.LatLng(4.9680724144,-6.07668590546),new google.maps.LatLng(4.9678940773,-6.08311223984),new google.maps.LatLng(4.97125005722,-6.10006284714),new google.maps.LatLng(4.96874904633,-6.10352468491),new google.maps.LatLng(4.97889947891,-6.1075720787),new google.maps.LatLng(4.98791646957,-6.11369419098),new google.maps.LatLng(4.99021482468,-6.113904953),new google.maps.LatLng(4.9912109375,-6.11242866516),new google.maps.LatLng(4.99108362198,-6.10554981232),new google.maps.LatLng(4.9940571785,-6.09903335571),new google.maps.LatLng(4.99183511734,-6.09186172485)]'
+</code>
+
+To do that with django, I import the GPolygon object from django.contrib.gis.maps.google.overlays.  It takes a geodjango multipolygon object and returns a string which is acceptable to the google maps api polygon constructor paths argument.  I've added a gpoly method to my geodjango object that wraps the GPolygon object and returns the correct string.
+<h3>supporting google maps api v3</h3>
+Unfortunately, geodjango seems to be written with v2 of the google maps api in mind, at least in the current version.  In order to transfer the output of the GPolygon method, we simply do a replace in the string.  The gpoly method looks like the following.
+<code lang="python">
+def gpoly(self):
+gpoly = GPolygon(self.geom[0])
+return gpoly.points.replace('GLatLng', 'google.maps.LatLng')</code>

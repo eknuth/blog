@@ -1,0 +1,36 @@
+--- 
+layout: post
+title: the node.js and postgis backend for seatmate
+tags: 
+- geolocation
+- javascript
+- location based service
+- node.js
+- postgis
+- seatMate
+- technology
+- trimet
+status: publish
+type: post
+published: true
+meta: 
+  _edit_last: "1"
+  _canonical: ""
+---
+So far I haven't spent much development time working on the backend for seatMate.  I mentioned that I was using <a href="http://nodejs.org" target="_blank">node.js</a> to serve up the static files on my development server and <a href="http://nodejitsu.com" target="_blank">nodejitsu</a>.  The backend also saves and retrieves comments from a list stored in <a href="http://redis.io" target="_blank">redis</a>.
+<h2>backend architecture choices, async events with node.js</h2>
+The great thing about node and redis is that they support asynchronous operations in the same way that javascript handles events in the browser.  To make things even more responsive, I'm using <a href="http://socket.io" target="_blank">socket.io</a> to pass an object to a method on the server, rather than using an http post when the client submits a comment .  socket.io acts like a websocket, but degrades to flash sockets, long polling and other less fancy methods to support all browsers including IE6.
+
+In a previous post, I wrote more about <a href="http://iknuth.com/2011/12/exploring-node-redis-in-node-js-using-the-mocha-testing-framework-2/">node and redis</a>.
+<h2>pushing events back to the browser with socket.io</h2>
+The benefit to using socket.io and node  is that I can trigger events in the browser from the server without doing any polling from the client.  This will be handy when it comes to the chat and instant messaging components, which update in real time.  When a user sends a message, the backend can immediately relay it to any other device connected to the channel causing it to appear in their browser.
+<h2>using redis to store and relay information</h2>
+redis is the other technology I added to the project.  It is one of the new nosql datastores, but it also supports other features that will make it useful here.  redis is a data structure storage engine and can handle strings, hashes, sets and sorted sets.  It also has a publisher/subscriber functionality that makes it a snap to implement a messaging queue.
+
+For the comment view, I'm pushing incoming messages into a redis list and retrieving the last 15 messages when rendering the comment view.  All these operations are extremely fast, even if the list gets huge.  No need to talk about the big o, but it will stay fast at scale.
+<h2>performing spatial queries on a geodatabase with postgis</h2>
+The next step is to actually tie the comments to specific bus routes and busses.  For the contest I have to use TriMet data.  The stops, routes, and possibly the real time transit feeds are exactly what I need.  To start matching up users with routes, I need to be able to select the route that is closest to the location of the the rider.
+
+It would be trivial to perform this sort of operation with points, although scaling might get difficult.  Calculating the distance to a line from a point is an easy to do with postgis, the geodatabase extension to postgresql.  My next step is to create a method that queries postgis for routes that are closest to the location of the device as reported by the geolocation api.
+
+In cases where the user is on a bus that travels the same path as our routes this operation will return multiple rows and, I will have to use other data to disambiguate the results.  Just grabbing the closest route is good enough for now, though.

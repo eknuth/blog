@@ -1,0 +1,44 @@
+--- 
+layout: post
+title: exploring redis in node.js using the mocha testing framework
+tags: 
+- javascript
+- mocha
+- node.js
+- redis
+- technology
+- testing
+status: publish
+type: post
+published: true
+meta: 
+  _edit_last: "1"
+  _canonical: ""
+  _wp_old_slug: exploring-node-redis-in-node-js-using-the-mocha-testing-framework
+---
+<h1>overview</h1>
+<h2>node.js</h2>
+<a href="http://nodejs.org/">Node</a> is currently the cool kid of the web dev scene and is starting to take over.  Node is the project that lets you run javascript on the server side in a super fast v8 based vm.  Out of the gate, it is evented/async, non blocking and ridiculously fast.  Javascript has a lot of haters, but it is undeniably an interesting and powerful language.   The node community is thriving and mature.  The tools are awesome and it is a blast to use.
+<h2>redis</h2>
+<a href="http://redis.io/">redis</a> is amazing. It is one of the stars of the nosql movement. It is a server that stores strings, lists, sets and hashes. If that isn't even it also lets you do publisher/subscriber to trigger events. It is a natural fit for node and if you try it, you'll like it.
+<h2>mocha</h2>
+<a href="http://visionmedia.github.com/mocha/">Mocha</a> is the latest generation of node/js test frameworks by <a href="http://tjholowaychuk.com/">TJ Holowaychuk</a>. It is fast and allows for incredibly easy asynchronous testing. It supports standard assertions as well as bdd style tests using should.
+<h1>setup node and mocha</h1>
+This gist uses <a href="http://mxcl.github.com/homebrew/">homebrew</a> to install node. OSX has great support for node and homebrew is by far the best package manager. npm is among other things the command to install node packages. We're using the -g flag to npm to install the package globally, otherwise it would be installed for just this project.
+
+[gist id=1491206 file=setup.sh]
+
+Now, if you type "mocha" at the command line, it will execute the non existent tests in our test directory and return the results. Since we have no tests, it should look something like this:
+<a href="/assets/images/2011/12/Screen-shot-2011-12-17-at-10.19.38-AM.png"><img class="aligncenter size-full wp-image-429" title="zero tests with mocha" src="/assets/images/2011/12/Screen-shot-2011-12-17-at-10.19.38-AM.png" alt="" width="201" height="43" /></a>
+<h2>Async testing with mocha and should</h2>
+The following gist is a basic asynchronous test using mocha and the <a href="https://github.com/visionmedia/should.js">should</a> bdd style assertion library. Async tests can be challenging because you are testing things that happen at various times. We are going to set a key and make sure the callback function gets called without an error.
+
+Generally that is hard, but mocha gives us a sweet little callback called done that we can pass to our redis set command. It ensures that the callback happens successfully and no errors are passed. If you've done async testing in the pass, you will probably be amazed at how painless it is to do it like this.
+
+In the second test we are going to retrieve the key we just set and explicitly test the value in the callback. To make sure the async happens as we expect, we manually call done() after our assertions.
+[gist id=1491206 file=test/test_redis.js]
+If we didn't call done, the test would hang until it times out. When called correctly we should get a result like this.
+<a href="/assets/images/2011/12/Screen-shot-2011-12-17-at-11.22.57-AM.png"><img class="aligncenter size-full wp-image-433" title="Screen shot 2011-12-17 at 11.22.57 AM" src="/assets/images/2011/12/Screen-shot-2011-12-17-at-11.22.57-AM.png" alt="" width="207" height="56" /></a>
+As you can see, 3 milliseconds is not bad for a couple of async tests. It definitely beats setting a clock and waiting for it to run out!
+
+Just remember to <a href="http://ryanflorence.com/2011/2012/case-against-coffeescript/" target="_blank">say "no" to coffee script</a>.

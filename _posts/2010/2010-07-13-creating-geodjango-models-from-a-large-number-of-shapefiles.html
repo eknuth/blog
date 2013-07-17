@@ -1,0 +1,112 @@
+--- 
+layout: post
+title: creating geodjango models from a large number of shapefiles
+tags: 
+- uncategorized
+status: draft
+type: post
+published: false
+meta: 
+  _edit_last: "1"
+---
+<h1>Overview</h1>
+As a member of the Portland, Oregon GIS developer community, I am excited about the City's <a href="http://civicapps.org">civicapps</a> contest.  Portland has embraced the principle of open data access and has made a lot of it's geospatial data available to the public.
+
+They are also encouraging development using this data by creating a contest with prizes that come in folding money.  Participants are encourage to contribute ideas and applications on their website.  I am working on a few projects, one of which is create geodjango models for all of the shapefiles that have been released.  I am starting with approximately 34 datasets which I have downloaded.
+
+These models will be made available in a publicly accessible git <a href="http://github.com/eknuth/civicapps">repository</a> on github.  You can grab a copy with the following command:
+<code lang="bash">
+git clone git://github.com/eknuth/pdxpy.git
+</code>
+
+You can also download it directly at the following link:
+zip: <a href="http://github.com/eknuth/civicapps/zipball/master">http://github.com/eknuth//zipball/master</a>
+tar: <a href="http://github.com/eknuth/civicapps/tarball/master">http://github.com/eknuth/civicapps/tarball/master</a>
+<h1>Procedure</h1>
+I have created a project called 'civicapps' which contains a single application with the name 'civicdata'.  In the app, I have unzipped the shapefiles from the website into a directory called 'raw'.
+<h2>postgis and geodjango</h2>
+To generate the models from these shapefiles, we first have to configure our project to use the gis extensions to django.  I use geodjango with postgis, but you may also use spatialite and even mysql, which has limited spatial feature support.  Your best bet is postgreSQL.
+
+create the database
+
+For this project I am using postgresql 8.4, running on ubuntu 9.10 on a slicehost vps.  To create the database and load the postgis extensions execute the following commands, or you can run the script in civicdata/scripts/create_db.sh
+<code lang="bash">
+createdb civicdata
+createlang plpgsql civicdata
+psql civicdata -f /usr/share/postgresql/8.4/contrib/postgis.sql
+psql civicdata -f /usr/share/postgresql/8.4/contrib/spatial_ref_sys.sql
+psql civicdata -f civicdata/scripts/srid.sql
+</code>
+Create a database user with sufficient permissions to access the database and update your django settings.py to use it.
+<h3>enable geodjango</h3>
+Add the following to the list of installed apps in settings.py:
+<code lang="python">
+INSTALLED_APPS = (
+'django.contrib.auth',
+'django.contrib.contenttypes',
+'django.contrib.sessions',
+'django.contrib.sites',
+'django.contrib.gis',
+'civicdata'</code>
+
+<code lang="python"> </code>
+
+<code lang="python">)
+</code>
+<h3>create the models</h3>
+geodjango adds an ogrinspect command to manage.py, which allows you to query shapefiles.  It also lets you generate boilerplate code for the model definitions and data loading.
+
+Running ogrinspect on the Bicycle Network shapefile without any options will give you a model definition like this:
+<code lang="python">
+ed@iknuth:~/proj/civicapps$ python manage.py ogrinspect civicdata/raw/Bicycle_Network_pdx/Bicycle_Network_pdx.shp Bicycle_Network
+# This is an auto-generated Django model module created by ogrinspect.
+from django.contrib.gis.db import models</code>
+
+<code lang="python"> </code>
+
+<code lang="python">class Bicycle_Network(models.Model):
+geodb_oid = models.FloatField()
+objectid = models.FloatField()
+modifiedby = models.CharField(max_length=30)
+modifiedon = models.DateField()
+modifiedus = models.CharField(max_length=30)
+comments = models.CharField(max_length=254)
+tranplanid = models.CharField(max_length=15)
+segmentnam = models.CharField(max_length=50)
+status = models.CharField(max_length=15)
+facility = models.CharField(max_length=8)
+facilityde = models.CharField(max_length=50)
+projectid = models.CharField(max_length=15)
+yearbuilt = models.FloatField()
+num8inline = models.FloatField()
+material8i = models.CharField(max_length=3)
+num4inline = models.FloatField()
+material4i = models.CharField(max_length=3)
+assets_pdo = models.FloatField()
+shape_len = models.FloatField()
+geom = models.LineStringField(srid=-1)
+objects = models.GeoManager()
+</code>
+
+Since all of our shapefiles are available in directories underneath our project we can use the following command to
+<code lang="bash">
+for shpfile in `find civicdata/raw -name *.shp`; do python manage.py ogrinspect $shpfile `basename $shpfile .shp` --mapping  --multi --srid=4326|tail -n +3; done &gt;civicdata/models.py
+</code>
+This will result in a file being written to civicdata/models.py containing all of the field definition and mapping information for each shapefile.  We are using a spatial reference of 4326 or WGS84 Latitude/Longitude, because it is easy.  Our data comes in a different projection, so we will need to transform the features on import.
+
+Right now, all we need to do is add the following import statement to the top of the models.py file.
+<code lang="python&gt;&lt;br /&gt; from django.contrib.gis.db import models&lt;br /&gt; &lt;/code&gt;&lt;/p&gt; &lt;p&gt;At this time, you might also want to strip any unwanted text out of this file.  For instance some of the layer names have _pdx prepended to them.  You can see that ogrinspect has pulled all of the attributes from each shapefile and create django model fields for them.  There is also a mapping between the attributes and our new model fields.  You can view the ddl for the database schema with by executing manage.py:&lt;br /&gt; &lt;code lang=">
+python manage.py sqlall civicapps
+</code>
+<h3>load the data</h3>
+Now that we have model definitions, we need to load the data into postgis.  Since we have a lot of models, it would be a good idea to script this process.  We want to iterate through all of our shapefiles and load the data into the relevant model tables.  Geodjango provides an excellent data loading system, which we will use.
+
+First of all we have to install the database schema.  From the project directory, execute this management command.  You will be prompted to create an admin user.  Then we need to jump into the python shell.
+<code lang="bash">
+python manage.py syncdb
+python manage.py shell
+</code>
+<code lang="python">
+from civicdata import load
+load.run
+</code>

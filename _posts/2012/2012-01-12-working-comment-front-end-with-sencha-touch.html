@@ -1,0 +1,31 @@
+--- 
+layout: post
+title: working comment front end with sencha touch
+tags: 
+- extjs
+- mobile
+- seatMate
+- sencha
+- technology
+- trimet
+status: publish
+type: post
+published: true
+meta: 
+  _edit_last: "1"
+  _thumbnail_id: "484"
+  _canonical: ""
+---
+After spending a day watching <a href="http://www.sencha.com/learn/touch/#Xx/screencast/date/desc" target="_blank">Sencha Touch screencast videos</a>, I've got my comment view cleaned working and deployed to nodejitsu at <a href="http://seatmate.nodejitsu.com" target="_blank">http://seatmate.nodejitsu.com</a>.  Basically the same code should make the chat and instant messaging views function as well.  Feel free to file bug reports on the <a href="https://github.com/eknuth/seatMate/issues" target="_blank">seatMate github issue tracker</a>.
+
+<a href="/assets/images/2012/01/Screen-shot-2012-01-12-at-1.38.01-PM.png"><img class="alignleft size-medium wp-image-484" title="comment view mockup" src="/assets/images/2012/01/Screen-shot-2012-01-12-at-1.38.01-PM-246x300.png" alt="comment view mockup" width="246" height="300" /></a>I've got a Sencha list view with an xtemplate bound to a json store.  There is a form panel that dispatches to a controller for posting messages to a single comment channel on the backend.  When the page loads, the datastore is prepopulated with the last 10 or so  comments on the channel.  The list view scrolls independently of the rest of the page.
+
+New comments entered through the form are added to the view immediately, but comments posted on other devices are not displayed automatically.  That would be what makes the feature that differentiates the comment view from the chat view.  I also need to tweak the css to make the comments smaller and have more of them on the screen at once.
+
+The app works on Android and iOS browsers, as well as desktop webkit browsers like Chrome, but has some trouble with Firefox.  Unfortunately that is a problem for all Sencha Touch apps.
+
+Development was good considering I also had to learn Sencha/ExtJS.  Unfortunately I don't have any javascript unit tests.  I have a hard time doing TDD when I'm using a new framework, but I'd be able to do it next time.
+
+I'm going to finish the app in Sencha, but I feel like it isn't the best approach for mobile web app development.  I'm writing a lot of code for what I'm getting and I prefer to build my interfaces in html rather than javascript.  The framework does provide a slick product and handles a lot of the mobile pain, though.
+
+I'd also prefer a solution that allowed the same app to run on mobile, tablets and desktops with responsive design.  Unfortunately sencha touch apps are relegated to the mobile ghetto.  But I feel like I'm making good progress overall.

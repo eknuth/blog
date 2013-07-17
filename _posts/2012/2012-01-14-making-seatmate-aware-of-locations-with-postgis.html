@@ -1,0 +1,36 @@
+--- 
+layout: post
+title: making seatmate aware of locations with postgis
+tags: 
+- location based service
+- mockup
+- postgis
+- postgresql
+- seatMate
+- sql
+- technology
+- trimet
+status: publish
+type: post
+published: true
+meta: 
+  _edit_last: "1"
+  _canonical: ""
+---
+Now that I've got the comment view more or less working, it's time to link it up with actual trimet routes.  I think we need an initial screen to show to users when they first bring up the app.  I imagine that people will be either riding the bus/max, or they will be waiting at the stop.  Seems like we need to start by showing routes that are closest the user's current location.
+
+<a href="/assets/images/2012/01/start-screen.png"><img class="aligncenter size-medium wp-image-516" title="start-screen" src="/assets/images/2012/01/start-screen-300x258.png" alt="start screen for seatmate app" width="300" height="258" /></a>
+<h2>performing spatial queries in postgis</h2>
+Our backend needs to support a method that takes a latitude and longitude in the commonly used WGS84 projection and return the routes that are closest to that point.  Just getting the nearest stops isn't useful because the rider may be actually travelling the route and not anywhere near a stop.  Luckily postgis makes it easy to select lines based on proximity to a point.  Please see the note from Regina in the comments for updated postgis functions.
+<script src="https://gist.github.com/1612154.js?file=spatial.sql"></script>
+
+This query returns the following results when applied against the postgis table I created from the trimet shapefile projected to WGS84. Note that postgres requires that we double quote the column names because they are capitalized.
+<script src="https://gist.github.com/1612154.js?file=results.txt"></script>
+
+<h2>grouping results in sql</h2>
+The routes returned look great for my current location. The data is accurate enough to differentiate between routes that run on the same street in different directions. If I were waiting at a bus stop, it would be a safe bet to assume that the bus I want is on the same side of the street as me. I still want to return other routes, but at this point I don't really care what direction they are going. I want to group the results and just return a single row for each route. We can achieve that goal by tweaking the sql. We just need to apply an aggregate to the distance and group the results by route. We could filter the results by distance, but there isn't really a need at this point.
+<script src="https://gist.github.com/1612154.js?file=improved.sql"></script>
+<script src="https://gist.github.com/1612154.js?file=improved_results.txt"></script>
+
+<h2>putting it all together</h2>
+I'm happy with these results. The next step is to wrap it in a method and expose it on our backend. Then I'll write a new Sencha touch view to request the data based on the coordinate returned from the geolocation api in the browser. Should be a snap.
