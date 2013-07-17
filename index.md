@@ -55,16 +55,17 @@ tagline: Supporting tagline
             </div>
             <div class="row">
                     <ul class="thumbnails thumbnails-1">
+                        {% for post in site.posts |limit:3 %}
                         <li class="span4">
                             <div class="thumbnail thumbnail-1">
                                 <img src="{{BASE_PATH}}/assets/themes/map/img/blog-featured-01.jpg" alt="">
                                 <section>
-                                    <a href="#"><h3>At vero eos et accusamus et iusto </h3></a>
+                                    <a href="{{ post.url }}"><h3>{{ post.title }}</h3></a>
                                     <div class="meta">
-                                        <time datetime="2012-11-09" class="date-1">
+                                        <time datetime="{{ post.date }}" class="date-1">
                                             <i class="icon-calendar">
                                             </i>
-                                            9.11.2012
+                                            {{ post.date |date: "%m-%d-%Y"}}
                                         </time>
                                         <!-- <div class="name-author">
                                                         <i class="icon-user">
@@ -75,58 +76,11 @@ tagline: Supporting tagline
                                     </div>
                                     <div class="clear">
                                     </div>
-                                    <a href="#" class="btn btn-1">view on flickr</a>
+                                    <a href="{{ post.url }}" class="btn btn-1">read more</a>
                                 </section>
                             </div>
                         </li>
-                        <li class="span4">
-                            <div class="thumbnail thumbnail-1">
-                                <img src="{{BASE_PATH}}/assets/themes/map/img/blog-featured-02.jpg" alt="">
-                                <section>
-                                    <a href="#"><h3>At vero eos et accusamus et iusto </h3></a>
-                                    <div class="meta">
-                                        <time datetime="2012-11-09" class="date-1">
-                                            <i class="icon-calendar">
-                                            </i>
-                                            9.11.2012
-                                        </time>
-                                        <!-- <div class="name-author">
-                                                        <i class="icon-user">
-                                                        </i>
-                                                        <a href="#">Admin</a>
-                                                    </div> -->
-                                        <!-- <a href="#" class="comments"><i class="icon-comment"></i> 7 comments</a> -->
-                                    </div>
-                                    <div class="clear">
-                                    </div>
-                                    <a href="#" class="btn btn-1">view on flickr</a>
-                                </section>
-                            </div>
-                        </li>
-                        <li class="span4">
-                            <div class="thumbnail thumbnail-1">
-                                <img src="{{BASE_PATH}}/assets/themes/map/img/blog-featured-03.jpg" alt="">
-                                <section>
-                                    <a href="#"><h3>At vero eos et accusamus et iusto </h3></a>
-                                    <div class="meta">
-                                        <time datetime="2012-11-09" class="date-1">
-                                            <i class="icon-calendar">
-                                            </i>
-                                            9.11.2012
-                                        </time>
-                                        <!-- <div class="name-author">
-                                                        <i class="icon-user">
-                                                        </i>
-                                                        <a href="#">Admin</a>
-                                                    </div> -->
-                                        <!-- <a href="#" class="comments"><i class="icon-comment"></i> 7 comments</a> -->
-                                    </div>
-                                    <div class="clear">
-                                    </div>
-                                    <a href="#" class="btn btn-1">view on flickr</a>
-                                </section>
-                            </div>
-                        </li>
+                        {% endfor %}
                     </ul>
             </div>
         </div>

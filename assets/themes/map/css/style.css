@@ -26,11 +26,11 @@ background: url(../img/bg-content.jpg) 50% 50%;
 .navbar .brand {
   line-height: 1;
   font-size: 56px;
-  color: white;
   text-shadow: none;
 }
 .navbar .brand a{
-  color: white;
+  color: rgb(49,42,30)!important;
+  font-weight: bold;
 }
 /* CSS Document */
 a[href^="tel:"] {
