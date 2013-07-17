@@ -12,7 +12,8 @@
   width: 100%;
 }
 .container .flexslider .slides > li .flex-caption h3 {
-  }
+
+}
 .container .flexslider .slides > li .flex-caption {
 width: 30%;
 z-index:1000;
@@ -21,6 +22,7 @@ font-size: 24px;
 left: auto;
 right: 20px;
 background: url(../img/bg-content.jpg) 50% 50%;
+z-index: 1000;
 }
 
 .navbar .brand {
