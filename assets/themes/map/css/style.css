@@ -321,6 +321,7 @@ p {
 .block-slogan p {
   border-left: 1px solid #454545;
   padding: 0 0 0 26px;
+  color: #ccc;
 }
 .block-slogan div {
   overflow: hidden;
