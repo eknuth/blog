@@ -1,8 +1,8 @@
 var images;
 
 
-var map = mapbox.map('map');
 var layer = mapbox.layer().id('eknuth.map-0na67qto');
+var map = mapbox.map('map', layer, null, []);
 // var layer = mapbox.layer().id('eknuth.map-56tlzhxg');
 // var layer = new MM.TemplatedLayer('http://b.tile.stamen.com/watercolor/{Z}/{X}/{Y}.png')
 map.addLayer(layer);

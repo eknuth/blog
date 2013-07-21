@@ -6,7 +6,7 @@ category:
 tags: ['place']
 lat: 58.3514
 lng: -134.5116
-zoom: 11
+zoom: 10
 ---
 {% include JB/setup %}
 I moved to Portland from Juneau	 where I lived an interesting life for 8 years.
