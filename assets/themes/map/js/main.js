@@ -29,8 +29,8 @@ var jsonFlickrFeed = function(results) {
 			},
 			before: function(slider) {
 				var $slide = $(slider.slides[slider.animatingTo]);
-				map.panTo([$slide.data('lat'), $slide.data('lng')]);
-				map.setZoom($slide.data('zoom'));
+				console.log([$slide.data('lat'), $slide.data('lng')], $slide.data('zoom'));
+				map.setView([$slide.data('lat'), $slide.data('lng')], $slide.data('zoom'));
 			}
 		});
 		$('.portfolio').find('.box').each(function(i, thumbnail) {
