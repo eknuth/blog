@@ -1,16 +1,12 @@
 var images;
 
 
-var map = L.mapbox.map('map', 'eknuth.map-00suez4o', { 
-	zoomControl: false, 
-	animate: true,
-	keyboard: false
-}).setView([45.5, -122.6], 8);
-
-map.dragging.disable();
-map.touchZoom.disable();
-map.doubleClickZoom.disable();
-map.scrollWheelZoom.disable();
+var map = mapbox.map('map');
+var layer = mapbox.layer().id('eknuth.map-0na67qto');
+// var layer = mapbox.layer().id('eknuth.map-56tlzhxg');
+// var layer = new MM.TemplatedLayer('http://b.tile.stamen.com/watercolor/{Z}/{X}/{Y}.png')
+map.addLayer(layer);
+map.centerzoom({lat: 45.5, lon: -122.6 },8);
 
 var jsonFlickrFeed = function(results) {
 	images = $.map(results.items, function(image) {
@@ -29,8 +25,7 @@ var jsonFlickrFeed = function(results) {
 			},
 			before: function(slider) {
 				var $slide = $(slider.slides[slider.animatingTo]);
-				console.log([$slide.data('lat'), $slide.data('lng')], $slide.data('zoom'));
-				map.setView([$slide.data('lat'), $slide.data('lng')], $slide.data('zoom'));
+				map.ease.location({ lat: $slide.data('lat'), lon: $slide.data('lng') }).zoom($slide.data('zoom')).optimal();
 			}
 		});
 		$('.portfolio').find('.box').each(function(i, thumbnail) {
