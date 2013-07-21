@@ -18,6 +18,7 @@
         <link href='http://api.tiles.mapbox.com/mapbox.js/v1.2.0/mapbox.css' rel='stylesheet' />
         <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300'
         rel='stylesheet' type='text/css'>
+        <link href="{{ ASSET_PATH }}/css/pygmentize.css?body=1" rel="stylesheet" type="text/css" media="all">
         <!-- atom & rss feed -->
         <link href="{{ BASE_PATH }}{{ site.JB.atom_path }}" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed">
         <link href="{{ BASE_PATH }}{{ site.JB.rss_path }}" type="application/rss+xml" rel="alternate" title="Sitewide RSS Feed">
@@ -68,7 +69,7 @@
                         <div class="navbar navbar_">
                             <div class="container">
                                 <h1 class="brand">
-                                    <a href="index.html">Edwin Knuth</a>
+                                    <a href="{{BASE_PATH}}/">Edwin Knuth</a>
                                 </h1>
                                 <a class="btn btn-navbar btn-navbar_" data-toggle="collapse" data-target=".nav-collapse_">Menu <span class="icon-bar"></span> </a>
                                 <div class="nav-collapse nav-collapse_  collapse">
@@ -150,7 +151,6 @@
     </body>
     <script type="text/javascript" src="{{ ASSET_PATH }}/js/jquery.js"></script>
     <script type="text/javascript" src="{{ ASSET_PATH }}/js/bootstrap.js"></script>
-    <script type="text/javascript" src="{{ ASSET_PATH }}/js/superfish.js"></script>
     <script type="text/javascript" src="{{ ASSET_PATH }}/js/jquery.flexslider-min.js"></script>
     <script type="text/javascript" src="{{ ASSET_PATH }}/js/jquery.easing.1.3.js"></script>
     <script type="text/javascript" src="{{ ASSET_PATH }}/js/jquery.cookie.js"></script>
@@ -158,9 +158,6 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/datejs/1.0/date.min.js"></script>
     <script src="{{ ASSET_PATH }}/js/jfeed.js"></script>
     <script src='http://api.tiles.mapbox.com/mapbox.js/v1.2.0/mapbox.js'></script>
-    <script src="{{ ASSET_PATH }}/js/main.js"></script>
-    <script src="http://www.flickr.com/services/feeds/photos_public.gne?id=87281647@N00&lang=Array[intl_lang]&format=json"></script>
-
     <script type="text/javascript">
             if ($(window).width() > 1024) {
         document.write("<" + "script src='{{ ASSET_PATH }}/js/jquery.preloader.js'></" + "script>");
@@ -181,4 +178,6 @@
             });
         });
     </script>
+    <script src="{{ ASSET_PATH }}/js/main.js"></script>
+    <script src="http://www.flickr.com/services/feeds/photos_public.gne?id=87281647@N00&lang=Array[intl_lang]&format=json"></script>
 </html>

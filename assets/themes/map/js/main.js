@@ -1,14 +1,19 @@
 var images;
 
 
-var map = L.mapbox.map('map', 'eknuth.map-00suez4o')
-	.setView([45.5, -122.6], 8);
+var map = L.mapbox.map('map', 'eknuth.map-00suez4o', { 
+	zoomControl: false, 
+	animate: true,
+	keyboard: false
+}).setView([45.5, -122.6], 8);
 
-
+map.dragging.disable();
+map.touchZoom.disable();
+map.doubleClickZoom.disable();
+map.scrollWheelZoom.disable();
 
 var jsonFlickrFeed = function(results) {
 	images = $.map(results.items, function(image) {
-		console.log(image);
 		return {
 			thumb: image.media.m,
 			title: image.title,
@@ -20,17 +25,19 @@ var jsonFlickrFeed = function(results) {
 	$(document).ready(function() {
 		$('.flexslider').flexslider({
 			start: function(slider) {
-
+				var $slide = $(slider.slides[slider.animatingTo]);
 			},
 			before: function(slider) {
 				var $slide = $(slider.slides[slider.animatingTo]);
+				map.panTo([$slide.data('lat'), $slide.data('lng')]);
+				map.setZoom($slide.data('zoom'));
 			}
 		});
-		$('.images').find('.thumbnail').each(function(i, thumbnail) {
+		$('.portfolio').find('.box').each(function(i, thumbnail) {
 			var $this = $(this);
 			$this.find('h3').text(images[i].title);
 			$this.find('img').attr('src', images[i].thumb);
-			$this.find('a').attr('href', images[i].link);
+			$this.find('a').attr('href', images[i].thumb.replace('_m.jpg', '_b.jpg'));
 			$this.find('time').text(new Date(images[i].date).toString('MM/d/yyyy'));
 		});
 	});

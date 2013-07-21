@@ -3,6 +3,7 @@
 
 #map {
   height: 400px;
+
 }
 .slides {
   height: 400px;
@@ -11,20 +12,35 @@
   height: 100%;
   width: 100%;
 }
-.container .flexslider .slides > li .flex-caption h3 {
 
-}
 .container .flexslider .slides > li .flex-caption {
-width: 30%;
-z-index:1000;
+width: 320px;
+height: auto;
+top: auto;
 font-family: 'Open Sans', sans-serif;
 font-size: 24px;
 left: auto;
-right: 20px;
+right: 120px;
+bottom: 20px;
 background: url(../img/bg-content.jpg) 50% 50%;
 z-index: 1000;
 }
-
+  .container .flexslider .slides > li .flex-caption h3 {
+    margin-top: 5px;
+    margin-left: 10px;
+    margin-bottom: 0px;
+  }
+  .container .flexslider .slides > li .flex-caption p {
+    line-height: 1;
+    font-size: 16px;
+    margin: 0 10px;
+    padding-bottom: 15px;
+  }
+  .container .flexslider .slides > li .flex-caption .buttons .btn {
+    color: white;
+    margin-bottom:15px;
+    margin-right: 15px;
+  }
 .navbar .brand {
   line-height: 1;
   font-size: 56px;
@@ -279,6 +295,7 @@ h3 {
 }
 .content-extra h3 {
   margin:25px 0;
+  line-height: 20px;
 }
 h4 {
   font-size: 48px;
@@ -329,6 +346,13 @@ p {
 .row-1, .row-2 {
   background: #fff;
   padding: 14px 0;
+}
+.row-gray {
+  background:#eee; 
+}
+.highlight pre{
+  background: #333!important;
+color: white;
 }
 .row-2 {
   background:#eee;
@@ -557,6 +581,9 @@ img {
 }
 .list-blog img {
   margin: 21px 0 24px;
+}
+.list-blog p {
+  color: #ccc;
 }
 .meta {
   
