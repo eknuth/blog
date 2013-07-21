@@ -9,4 +9,4 @@ lng: -122.6750
 zoom: 8
 ---
 {% include JB/setup %}
-I live on the slopes of a dormant volcano in a beautiful city.
+I live and work in a beautiful city on the slopes of a dormant volcano.

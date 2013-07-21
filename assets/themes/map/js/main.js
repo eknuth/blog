@@ -1,6 +1,7 @@
 var images;
 
 
+// var layer = mapbox.layer().id('eknuth.map-00suez4o');
 var layer = mapbox.layer().id('eknuth.map-0na67qto');
 var map = mapbox.map('map', layer, null, []);
 // var layer = mapbox.layer().id('eknuth.map-56tlzhxg');
