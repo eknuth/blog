@@ -12,13 +12,13 @@ tagline: Supporting tagline
                 <ul class="slides">
                     {% for place in site.tags.place reversed %}
                     <li data-lat="{{place.lat}}" data-lng="{{place.lng}}" data-zoom="{{place.zoom}}" {% if forloop.first %}class="flex-active-slide"{% endif %}>                                
-                      <div class="flex-caption">
-                        <h3>{{ place.title }}</h3>
-                        {{ place.content }}
-                        <!-- <div class="buttons">
-                            <a href="{{ place.url }}" class="btn btn-1 pull-right">read more</a>
-                        </div> -->
-                    </div>
+                      <div class="flex-caption hidden">
+                            <h3>{{ place.title }}</h3>
+                            {{ place.content }}
+                            <!-- <div class="buttons">
+                                <a href="{{ place.url }}" class="btn btn-1 pull-right">read more</a>
+                            </div> -->
+                        </div>
                     </li>
                     {% endfor %}
                 </ul>

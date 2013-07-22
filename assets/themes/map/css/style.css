@@ -1,6 +1,10 @@
 @import url(http://fonts.googleapis.com/css?family=Dorsa);
 @charset "utf-8";
 
+.hidden {
+  display: none;
+}
+
 #map {
   height: 400px;
 
