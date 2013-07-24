@@ -26,6 +26,10 @@ map.centerzoom({lat: 0, lon: 0 },3);
  // map.ui.zoomer.add();
 var markers = mapbox.markers.layer().url( app.basePath + '/assets/data/places.geojson');
 map.addLayer(markers);
+map.addCallback('zoomed', function(m) {
+    // respond to new center:
+   console.log('zoomed');
+});
 var jsonFlickrFeed = function(results) {
 	images = $.map(results.items, function(image) {
 		return {
