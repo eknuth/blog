@@ -9,4 +9,4 @@ lng: -86.5264
 zoom: 17
 ---
 {% include JB/setup %}
-I grew up in Bloomington, including a few years at Indiana University.  I studied computer science, theater and was introducted to unix and the web.
+I grew up in Bloomington, including a few years at Indiana University where I studied computer science and theater.  This was where I was introducted to unix and the web.

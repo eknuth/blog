@@ -23,7 +23,7 @@ var map = mapbox.map('map', layer, null, []);
 map.addLayer(layer);
 // map.centerzoom({lat: 45.5, lon: -122.6 },3);
 map.centerzoom({lat: 0, lon: 0 },3);
- map.ui.zoomer.add();
+ // map.ui.zoomer.add();
 var markers = mapbox.markers.layer().url( app.basePath + '/assets/data/places.geojson');
 map.addLayer(markers);
 var jsonFlickrFeed = function(results) {

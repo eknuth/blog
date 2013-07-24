@@ -25,20 +25,23 @@ font-family: 'Open Sans', sans-serif;
 font-size: 24px;
 left: auto;
 right: 120px;
-bottom: 20px;
+bottom: 30px;
 background: url(../img/bg-content.jpg) 50% 50%;
 z-index: 1000;
+
 }
   .container .flexslider .slides > li .flex-caption h3 {
     margin-top: 5px;
     margin-left: 10px;
-    margin-bottom: 0px;
+    margin-bottom: 2px;
   }
   .container .flexslider .slides > li .flex-caption p {
     line-height: 1;
     font-size: 16px;
     margin: 0 10px;
     padding-bottom: 15px;
+    font-weight: normal;
+    color: #bbb;
   }
   .container .flexslider .slides > li .flex-caption .buttons .btn {
     color: white;
