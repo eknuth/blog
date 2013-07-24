@@ -10,7 +10,7 @@ tagline: Supporting tagline
             <!-- slider -->
             <div class="flexslider" id="map">
                 <ul class="slides">
-                    {% for place in site.tags.place reversed %}
+                    {% for place in site.tags.place %}
                     <li data-lat="{{place.lat}}" data-lng="{{place.lng}}" data-zoom="{{place.zoom}}" {% if forloop.first %}class="flex-active-slide"{% endif %}>                                
                       <div class="flex-caption hidden">
                             <h3>{{ place.title }}</h3>

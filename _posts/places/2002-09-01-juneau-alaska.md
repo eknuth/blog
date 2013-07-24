@@ -9,4 +9,4 @@ lng: -134.5116
 zoom: 10
 ---
 {% include JB/setup %}
-I moved to Portland from Juneau	 where I lived an interesting life for 8 years.
+I moved to Portland from Juneau	where I went school, built weather stations, lived on a boat and discovered gis.
