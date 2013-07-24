@@ -9,4 +9,4 @@ lng: -77.0078
 zoom: 14
 ---
 {% include JB/setup %}
-A few days before 9/11/2001 I moved to the Washington, DC area.
+A few days before 9/11/2001 I moved to the Washington, DC area.  I worked for an NGO developing an online commerce platform for artisans in developing countries.

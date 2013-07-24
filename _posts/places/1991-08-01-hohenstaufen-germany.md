@@ -9,4 +9,4 @@ lng: 9.716
 zoom: 15
 ---
 {% include JB/setup %}
-During my first year in Germany, I lived below the ruins of an 11th century castle.
+During my first year in Germany, I lived on a hill below the ruins of an 11th century castle.
