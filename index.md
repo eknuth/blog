@@ -55,6 +55,51 @@ tagline: Supporting tagline
     <div class="ic">
     </div>
     <div class="row-1">
+        <div class="container">
+            <div class="row">
+                <article class="span12">
+                    <h4>From the blog</h4>
+                </article>
+            </div>
+            <div class="row">
+                    <ul class="thumbnails thumbnails-1">
+                        {% assign counter = '' %}
+                        {% for post in site.posts %}
+                            {% unless post.tags contains 'place' %}
+                            {% if counter.size < 4 %}
+                            <li class="span3">
+                                {% capture counter %}{{ counter }}*{% endcapture %}
+                                <div class="thumbnail thumbnail-1">
+                                    <img src="{{BASE_PATH}}/assets/themes/map/img/blog-featured-01.jpg" alt="">
+                                    <section>
+                                        <a href="{{ post.url }}"><h3>{{ post.title }}</h3></a>
+                                        <div class="meta">
+                                            <time datetime="{{ post.date }}" class="date-1">
+                                                <i class="icon-calendar">
+                                                </i>
+                                                {{ post.date |date: "%m-%d-%Y"}}
+                                            </time>
+                                            <!-- <div class="name-author">
+                                                            <i class="icon-user">
+                                                            </i>
+                                                            <a href="#">Admin</a>
+                                                        </div> -->
+                                            <!-- <a href="#" class="comments"><i class="icon-comment"></i> 7 comments</a> -->
+                                        </div>
+                                        <div class="clear">
+                                        </div>
+                                        <a href="{{ post.url }}" class="btn btn-1">read more</a>
+                                    </section>
+                                </div>
+                            </li>
+                            {% endif %}
+                            {% endunless %}
+                        {% endfor %}
+                    </ul>
+            </div>
+        </div>
+    </div>
+    <div class="row-1">
               <div class="container">
                 <div class="row">
                   <article class="span12">
@@ -74,10 +119,10 @@ tagline: Supporting tagline
                     <li class="box">
                       <a href="{{BASE_PATH}}/assets/themes/map/img/image-blank.png" class="magnifier"><img alt="" src="{{BASE_PATH}}/assets/themes/map/img/work/3.jpg"></a>
                     </li>
-                    <li class="box">
+          <!--           <li class="box">
                       <a href="{{BASE_PATH}}/assets/themes/map/img/image-blank.png" class="magnifier"><img alt="" src="{{BASE_PATH}}/assets/themes/map/img/work/4.jpg"></a>
-                    </li>
-                    <li class="box">
+                    </li> -->
+                    <!-- <li class="box">
                       <a href="{{BASE_PATH}}/assets/themes/map/img/image-blank.png" class="magnifier"><img alt="" src="{{BASE_PATH}}/assets/themes/map/img/work/5.jpg"></a>
                     </li>
                     <li class="box">
@@ -88,50 +133,11 @@ tagline: Supporting tagline
                     </li>
                     <li class="box">
                       <a href="{{BASE_PATH}}/assets/themes/map/img/image-blank.png" class="magnifier"><img alt="" src="{{BASE_PATH}}/assets/themes/map/img/work/8.jpg"></a>
-                    </li>
+                    </li> -->
                   </ul>
                 </div>
               </div>
             </div>
-    <div class="row-1">
-        <div class="container">
-            <div class="row">
-                <article class="span12">
-                    <h4>From the blog</h4>
-                </article>
-            </div>
-            <div class="row">
-                    <ul class="thumbnails thumbnails-1">
-                        {% for post in site.posts |limit:4 %}
-                        <li class="span3">
-                            <div class="thumbnail thumbnail-1">
-                                <img src="{{BASE_PATH}}/assets/themes/map/img/blog-featured-01.jpg" alt="">
-                                <section>
-                                    <a href="{{ post.url }}"><h3>{{ post.title }}</h3></a>
-                                    <div class="meta">
-                                        <time datetime="{{ post.date }}" class="date-1">
-                                            <i class="icon-calendar">
-                                            </i>
-                                            {{ post.date |date: "%m-%d-%Y"}}
-                                        </time>
-                                        <!-- <div class="name-author">
-                                                        <i class="icon-user">
-                                                        </i>
-                                                        <a href="#">Admin</a>
-                                                    </div> -->
-                                        <!-- <a href="#" class="comments"><i class="icon-comment"></i> 7 comments</a> -->
-                                    </div>
-                                    <div class="clear">
-                                    </div>
-                                    <a href="{{ post.url }}" class="btn btn-1">read more</a>
-                                </section>
-                            </div>
-                        </li>
-                        {% endfor %}
-                    </ul>
-            </div>
-        </div>
-    </div>
     <div class="container">
         <div class="row">
             <article class="span6">

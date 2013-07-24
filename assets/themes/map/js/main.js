@@ -4,12 +4,26 @@ var images;
 
 
 // var layer = mapbox.layer().id('eknuth.map-00suez4o');
-var layer = mapbox.layer().id('eknuth.map-0na67qto');
+
+var layer, retina = window.devicePixelRatio >= 2;
+if (retina) {
+    // Retina tiles are sized 1/2 of normal tiles for twice the pixel
+    // density
+    map.tileSize = { x: 128, y: 128 };
+    // use a retina tileset
+    layer = mapbox.layer().id('eknuth.map-bm4l8vlb');
+} else {
+    // use a standard tileset
+    // layer = mapbox.layer().id('eknuth.map-00suez4o');
+    layer = mapbox.layer().id('eknuth.map-0na67qto');
+}
 var map = mapbox.map('map', layer, null, []);
 // var layer = mapbox.layer().id('eknuth.map-56tlzhxg');
 // var layer = new MM.TemplatedLayer('http://b.tile.stamen.com/watercolor/{Z}/{X}/{Y}.png')
 map.addLayer(layer);
-map.centerzoom({lat: 45.5, lon: -122.6 },8);
+// map.centerzoom({lat: 45.5, lon: -122.6 },3);
+map.centerzoom({lat: 0, lon: 0 },3);
+ map.ui.zoomer.add();
 var markers = mapbox.markers.layer().url( app.basePath + '/assets/data/places.geojson');
 map.addLayer(markers);
 var jsonFlickrFeed = function(results) {
@@ -27,6 +41,7 @@ var jsonFlickrFeed = function(results) {
 			slideshowSpeed: 10000,
 			start: function(slider) {
 				var $slide = $(slider.slides[slider.animatingTo]);
+				map.ease.location({ lat: $slide.data('lat'), lon: $slide.data('lng') }).zoom($slide.data('zoom')).optimal();
 				$slide.find('.hidden').removeClass('hidden');
 			},
 			before: function(slider) {
