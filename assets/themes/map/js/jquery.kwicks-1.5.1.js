@@ -187,7 +187,9 @@
 						return false;
 					});
 				} else {
-					container.flexslider();
+					container.flexslider({
+						slideshowSpeed: 10000
+					});
 				}
 			}
 			this.update = function () {
