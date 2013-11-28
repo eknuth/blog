@@ -44,7 +44,7 @@ tagline: Supporting tagline
                     <p>
                         I've been a sysadmin, dba and gis technician. I have an interest in maps, science
                         and information. I love javascript and enjoy building things for the web and mobile
-                        devices.
+                        devices.  I have a passion for test driven development and devops.
                     </p>
                     <p>
                         I work for <a href="http://pointnineseven.com" style="color: rgb(31, 150,169)">Point 97</a>, an <a href="http://ecotrust.org">Ecotrust</a> company, as a software developer.
