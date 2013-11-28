@@ -47,9 +47,7 @@ tagline: Supporting tagline
                         devices.
                     </p>
                     <p>
-                        I work for
-                        <a href="http://ecotrust.org">Ecotrust</a>
-                        as a front end developer.
+                        I work for <a href="http://pointnineseven.com" style="color: rgb(31, 150,169)">Point 97</a>, an <a href="http://ecotrust.org">Ecotrust</a> company, as a software developer.
                     </p>
                 </div>
             </div>
