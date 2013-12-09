@@ -22,102 +22,52 @@
               </div>
               <div class="clear">
               </div>
+              {% if page.photo %}
               <div class="">
-                <img alt="" src="{{BASE_PATH}}/assets/themes/map/img/blog-featured-01.jpg" style="visibility: visible; opacity: 1;">
+                <img alt="" src="{{BASE_PATH}}/assets/Flag_of_Cascadia.png" style="visibility: visible; opacity: 1;">
               </div>
+              {% endif %}
               {{ content }}
             </li>
           </ul>
         </div>
-      </article>
-      <article class="span4">
-        <h3 class="extra">
-          Search
-        </h3>
-        <form id="search" action="search.php" method="GET" accept-charset="utf-8">
-          <div class="clearfix">
-            <input type="text" name="s" onblur="if(this.value=='') this.value=''" onfocus="if(this.value =='' ) this.value=''">
-            <a href="#" onclick="document.getElementById('search').submit()" class="btn btn-1">Search</a>
-          </div>
-        </form>
-        <h3>
-          Categories
-        </h3>
-        <ul class="list extra extra1">
-          <li>
-            <a href="#">Vonsequat</a>
-          </li>
-          <li>
-            <a href="#">Utdminim veniam</a>
-          </li>
-          <li>
-            <a href="#">Qullamcorper</a>
-          </li>
-          <li>
-            <a href="#">Suscipitlobortis</a>
-          </li>
-          <li>
-            <a href="#">Comnsequat</a>
-          </li>
-          <li>
-            <a href="#">Duendrerit</a>
-          </li>
-          <li>
-            <a href="#">Facilisis</a>
-          </li>
-          <li>
-            <a href="#">Luptatum</a>
-          </li>
-          <li class="last">
-            <a href="#">Qui blandit</a>
-          </li>
-        </ul>
-        <h3>
-          Archive
-        </h3>
-        <div class="wrapper">
-          <ul class="list extra2 list-pad ">
-            <li>
-              <a href="#">May 2012</a>
-            </li>
-            <li>
-              <a href="#">April 2012</a>
-            </li>
-            <li>
-              <a href="#">March 2012</a>
-            </li>
-            <li>
-              <a href="#">February 2012</a>
-            </li>
-            <li>
-              <a href="#">January 2012</a>
-            </li>
-            <li class="last">
-              <a href="#">December 2011</a>
-            </li>
-          </ul>
-          <ul class="list extra2">
-            <li>
-              <a href="#">November 2012</a>
-            </li>
-            <li>
-              <a href="#">October 2012</a>
-            </li>
-            <li>
-              <a href="#">September 2012</a>
-            </li>
-            <li>
-              <a href="#">August 2012</a>
-            </li>
-            <li>
-              <a href="#">July 2012</a>
-            </li>
-            <li class="last">
-              <a href="#">June 2012</a>
-            </li>
+        <div class="pagination">
+          <ul>
+          {% if page.previous.category != 'Place'  %}
+            <li class="prev"><a href="{{ BASE_PATH }}{{ page.previous.url }}" title="{{ page.previous.title }}">&larr; {{ page.previous.title }}</a></li>
+          {% else %}
+            <li class="prev disabled"><a>&larr; Previous</a></li>
+          {% endif %}
+          {% if page.next.category != 'Place' %}
+            <li class="next"><a href="{{ BASE_PATH }}{{ page.next.url }}" title="{{ page.next.title }}">{{ page.next.title }} &rarr;</a></li>
+          {% else %}
+            <li class="next disabled"><a>Next &rarr;</a>
+          {% endif %}
           </ul>
         </div>
       </article>
+      <!-- <article class="span4">
+        <h3>
+          Archive
+        </h3>
+        {% unless page.categories == empty %}
+        Categories
+          <ul class="tag_box inline">
+            <li><i class="icon-folder-open"></i></li>
+            {% assign categories_list = page.categories %}
+            {% include JB/categories_list %}
+          </ul>
+        {% endunless %}  
+
+        {% unless page.tags == empty %}
+        Tags
+          <ul class="tag_box inline">
+            {% assign tags_list = page.tags %}
+            {% include JB/tags_list %}
+          </ul>
+        {% endunless %}  
+      
+      </article> -->
     </div>
   </div>
 </div>
